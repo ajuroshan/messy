@@ -42,9 +42,9 @@ class MessAttendance(models.Model):
         current_time = timezone.localtime().time()
 
         # Define meal times (local time)
-        breakfast_time = (time(6, 0), time(9, 0))  # Breakfast is served from 6 AM to 9 AM
-        lunch_time = (time(12, 0), time(14, 0))    # Lunch is served from 12 PM to 2 PM
-        dinner_time = (time(19, 0), time(21, 0))   # Dinner is served from 7 PM to 9 PM
+        breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
+        lunch_time = (time(12, 10), time(14, 45))    # Lunch is served from 12:10 PM to 12:45 PM
+        dinner_time = (time(20, 0), time(21, 0))   # Dinner is served from 8 PM to 9 PM
 
         # Set meal based on current local time
         if breakfast_time[0] <= current_time < breakfast_time[1]:

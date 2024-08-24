@@ -25,9 +25,15 @@ class MesscutForm(forms.ModelForm):
 		return start_date
 
 	def clean_end_date(self):
+		start_date = self.cleaned_data.get('start_date')
 		end_date = self.cleaned_data['end_date']
-		return end_date
 
+		if start_date and end_date:
+			if end_date < start_date + timedelta(days=2):
+				raise ValidationError("The end date must be at least 2 days after the start date.")
+			if end_date > start_date + timedelta(days=8):
+				raise ValidationError("The end date cannot be more than 8 days after the start date.")
+		return end_date
 	def clean(self):
 		cleaned_data = super().clean()
 		start_date = cleaned_data.get('start_date')

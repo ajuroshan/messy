@@ -54,9 +54,14 @@ def mark_attendance(request):
 					attendance = MessAttendance.objects.create(student=application)
 					attendance.save()
 				except Exception as e:
-					return HttpResponse("Attendance already marked")
+					return HttpResponse(f"Attendance already marked {e}")
 				return HttpResponse("Attendance marked successfully")
 		else:
 			return HttpResponse("Application not found")
 
 	return render(request, 'mess/scan_qr.html')
+
+
+def dashboard(request):
+	application = Application.objects.filter(applicant=request.user).first()
+	return render(request, 'mess/dashboard.html', {'application': application})

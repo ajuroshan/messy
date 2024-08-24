@@ -10,7 +10,8 @@ from .models import Application
 def home(request):
 	has_applied = Application.objects.filter(applicant=request.user).exists()
 	accepted = Application.objects.filter(applicant=request.user, accepted=True).exists()
-	return render(request, 'application/home.html', {'has_applied': has_applied, 'accepted': accepted})
+	application = Application.objects.filter(applicant=request.user).first()
+	return render(request, 'application/home.html', {'has_applied': has_applied, 'accepted': accepted, 'application': application})
 
 
 def apply(request):
