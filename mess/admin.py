@@ -16,3 +16,10 @@ class MessmenuAdmin(admin.ModelAdmin):
 	list_filter = ['date','breakfast','lunch','dinner']
 	search_fields = ['date','breakfast','lunch','dinner']
 	list_per_page = 10
+
+
+@admin.register(MessAttendance)
+class MessAttendanceAdmin(admin.ModelAdmin):
+	list_display = ['meal','student','timestamp']
+	list_filter = ['meal','student','timestamp']
+	search_fields = ['meal','student','timestamp']

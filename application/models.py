@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from mess.models import *
+import qrcode
+from io import BytesIO
+from django.core.files import File
 
 # Create your models here.
 
@@ -51,10 +54,39 @@ class Application(models.Model):
 	outmess = models.BooleanField(default=False)
 	food_preference = models.CharField(max_length=100, choices=food_preferences, default='nonveg')
 	claim = models.BooleanField(default=False)
+	qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+	attendance = models.ManyToManyField(MessAttendance, blank=True)
+
 
 
 	def __str__(self):
-		return str(self.applicant.username + ' - ' + self.created_at.strftime('%d-%m-%Y'))
+		return str(self.applicant.username + ' - ' + str(self.mess_no))
+
+	def save(self, *args, **kwargs):
+		if not self.pk:  # Only generate a QR code for new applications
+			last_application = Application.objects.order_by('mess_no').last()
+			if last_application:
+				self.mess_no = last_application.mess_no + 1
+			else:
+				self.mess_no = 100
+
+			qr = qrcode.QRCode(
+				version=1,
+				error_correction=qrcode.constants.ERROR_CORRECT_L,
+				box_size=10,
+				border=4,
+			)
+			qr.add_data(str(self.mess_no))  # Use application ID or another unique identifier
+			qr.make(fit=True)
+
+			img = qr.make_image(fill='black', back_color='white')
+			img_io = BytesIO()
+			img.save(img_io, format='PNG')
+			img_file = File(img_io, name=f'{self.mess_no}.png')
+
+			self.qr_code.save(f'{self.mess_no}.png', img_file, save=False)
+
+		super().save(*args, **kwargs)
 
 
 class AcceptedApplication(Application):

@@ -48,3 +48,4 @@ class MesscutForm(forms.ModelForm):
 							raise ValidationError("The mess cut dates overlap with an existing mess cut.")
 
 		return cleaned_data
+
