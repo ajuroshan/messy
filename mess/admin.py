@@ -23,3 +23,9 @@ class MessAttendanceAdmin(admin.ModelAdmin):
 	list_display = ['meal','student','timestamp']
 	list_filter = ['meal','student','timestamp']
 	search_fields = ['meal','student','timestamp']
+
+@admin.register(MessBill)
+class MessBillAdmin(admin.ModelAdmin):
+	list_display = ['amount','month','paid']
+	list_filter = ['amount','month','paid']
+	search_fields = ['amount','month','paid']

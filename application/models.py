@@ -56,6 +56,7 @@ class Application(models.Model):
 	claim = models.BooleanField(default=False)
 	qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 	attendance = models.ManyToManyField(MessAttendance, blank=True)
+	mess_bill = models.ManyToManyField(MessBill, blank=True)
 
 
 

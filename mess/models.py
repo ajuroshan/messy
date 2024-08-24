@@ -61,3 +61,19 @@ class MessAttendance(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} - {self.meal}"
+
+
+class MessBill(models.Model):
+    total_days = models.IntegerField(default=30)
+    effective_days = models.IntegerField(default=0)
+    amount_per_day = models.IntegerField(default=10)
+    establishment_charges = models.IntegerField(default=50)
+    feast_charges = models.IntegerField(default=0)
+    other_charges = models.IntegerField(default=0)
+    mess_cuts = models.IntegerField(default=0)
+    amount = models.IntegerField()
+    month = models.DateField()
+    date_paid = models.DateField()
+    paid = models.BooleanField(default=False)
+    def __str__(self):
+        return f"{self.amount}"

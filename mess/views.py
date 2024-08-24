@@ -42,12 +42,20 @@ def mark_attendance(request):
 
 		# Find the application using the mess_no from the QR code
 		application = Application.objects.filter(mess_no=qr_code_data).first()
-
+		messcuts = application.messcuts.all()
 		if application:
-			# Create the attendance record, linking it to the current user
-			attendance = MessAttendance.objects.create(student=application)
-			attendance.save()
-			return HttpResponse("Attendance marked successfully")
+			if messcuts:
+				for messcut in messcuts:
+					if messcut.start_date <= date.today() <= messcut.end_date:
+						return HttpResponse("You cannot mark attendance during a messcut period")
+			else:
+				# Create the attendance record, linking it to the current user
+				try:
+					attendance = MessAttendance.objects.create(student=application)
+					attendance.save()
+				except Exception as e:
+					return HttpResponse("Attendance already marked")
+				return HttpResponse("Attendance marked successfully")
 		else:
 			return HttpResponse("Application not found")
 
