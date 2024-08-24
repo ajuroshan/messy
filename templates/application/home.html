@@ -7,5 +7,18 @@
     <h1>Welcome to the Hostel Mess Management App</h1>
     <p class="lead">Easily manage your meals and schedule.</p>
     <a href="#" class="btn btn-primary btn-lg">View Menu</a>
+
+    {% if not  has_applied %}
+    <a href={% url 'apply' %} class="btn btn-primary btn-lg">Apply for Mess</a>
+    {% elif not accepted %}
+    <p class="mt-3">You have applied for the mess.
+    we will soon accept your application </p>
+    {% endif %}
+
+    {% if accepted %}
+    <a href={% url 'profile' %} class="btn btn-primary btn-lg">Profile</a>
+    {% endif %}
+
+
 </div>
 {% endblock %}

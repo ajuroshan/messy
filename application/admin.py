@@ -5,14 +5,14 @@ from .models import *
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-	list_display = ['applicant','mess_no','accepted','created_at']
+	list_display = ['applicant','department','semester','mess_no','accepted','created_at']
 	list_filter = ['applicant','hostel','mess_no','accepted','created_at']
 	search_fields = ['applicant','hostel','accepted','created_at']
-	list_per_page = 10
+
 
 @admin.register(AcceptedApplication)
 class AcceptedApplicationAdmin(admin.ModelAdmin):
-	list_display = ['applicant','mess_no','accepted','created_at']
+	list_display = ['applicant','department','semester','mess_no','accepted','created_at']
 	list_filter = ['applicant','hostel','mess_no','accepted','created_at']
 	search_fields = ['applicant','hostel','accepted','created_at']
 	list_per_page = 10

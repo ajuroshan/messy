@@ -45,6 +45,8 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'crispy_forms',
+    'crispy_bootstrap5',
 
     'application',
     'mess',
@@ -157,3 +159,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'ajuaju0483@gmail.com'
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"

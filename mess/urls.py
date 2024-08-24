@@ -1,0 +1,8 @@
+from django.contrib import admin
+from django.urls import path
+from .views import *
+
+urlpatterns = [
+    path('apply_messcut/',apply_for_messcut,name='apply_for_messcut'),
+
+    ]
