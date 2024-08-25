@@ -4,6 +4,8 @@ from django.shortcuts import redirect
 from mess.models import MessAttendance, Messcut
 from .forms import ApplicationForm
 from .models import Application
+import datetime
+from mess.models import Messmenu
 
 # Create your views here.
 
@@ -11,7 +13,20 @@ def home(request):
 	has_applied = Application.objects.filter(applicant=request.user).exists()
 	accepted = Application.objects.filter(applicant=request.user, accepted=True).exists()
 	application = Application.objects.filter(applicant=request.user).first()
-	return render(request, 'application/home.html', {'has_applied': has_applied, 'accepted': accepted, 'application': application})
+
+	today = datetime.datetime.now().strftime('%A').lower()  # Get today's day in lowercase
+	menu_today = Messmenu.objects.filter(day=today).first()
+	weekly_menu = Messmenu.objects.all().order_by('day')  # Get the full week's menu
+
+	context = {
+		'date': datetime.datetime.now().date(),
+		'menu_today' : menu_today,
+		'weekly_menu': weekly_menu,
+		'has_applied': has_applied,
+		'accepted': accepted,
+		'application': application
+	}
+	return render(request, 'application/home.html', context)
 
 
 def apply(request):
@@ -26,23 +41,6 @@ def apply(request):
 		form = ApplicationForm()
 
 	return render(request, 'application/apply.html', {'form': form})
-
-
-
-def calculate_mess_bill(request):
-	# Constants
-	MONTH = 6
-	AMOUNT_PER_DAY = 10
-	ESTABLISHMENT_CHARGES = 50
-	TOTAL_DAYS = 30
-
-	for application in Application.objects.filter(accepted=True):
-		# Calculate the total amount
-		mess_cuts = application.messcuts.filter(start_date__month=MONTH).count()
-		effective_days = TOTAL_DAYS - mess_cuts
-		total_amount = (AMOUNT_PER_DAY * effective_days) + ESTABLISHMENT_CHARGES
-		application.mess_bill.create(total_amount=total_amount, month=MONTH, paid=False)
-		application.save()
 
 
 

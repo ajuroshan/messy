@@ -11,27 +11,53 @@
                 we will soon accept your application </p>
         {% endif %}
         {% if accepted %}
-            <div class="card w-auto ">
-                <div class="card-body">
-                    <div class="d-flex flex-column align-items-center p-1">
-                        <img src="{{ application.profile_pic.url }}" alt="Profile Picture" class="rounded-circle mb-3"
-                             style="width: 120px; height: 120px; object-fit: cover;">
-                        <h5 class="mb-0">{{ application.applicant.username| title }}</h5>
-                        <small class="text-muted">{{ application.department| upper }} {{ application.semester }}</small>
+            <div class="">
+                {% if menu_today %}
+                    <h5 class="mb-3">{{ date|date:"l jS F" }}</h5>
+                    <div class="">
+                        <table class=" table table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ menu_today.breakfast|title }}</td>
+                                <td>{{ menu_today.lunch|title }}</td>
+                                <td>{{ menu_today.dinner|title }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="card-text">
-                        <img src="{{ application.qr_code.url }}" alt="QR Code">
+                {% else %}
+                    <p>No menu available for today.</p>
+                {% endif %}
+
+
+                <div class="card ">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-center p-1">
+                            <img src="{{ application.profile_pic.url }}" alt="Profile Picture"
+                                 class="rounded-circle mb-3"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                            <h5 class="mb-0">{{ application.applicant.username| title }}</h5>
+                            <small class="text-muted">{{ application.department| upper }} {{ application.semester }}</small>
+                        </div>
+                        <div class="card-text">
+                            <img src="{{ application.qr_code.url }}" alt="QR Code">
+                        </div>
+                        <h5 class="mb-4">Mess No: {{ application.mess_no| title }}</h5>
                     </div>
-                    <h5 class="mb-4">Mess No: {{ application.mess_no| title }}</h5>
-                </div>
-                <div class="d-flex justify-content-evenly mb-4">
-                    <a href="{% url 'apply_for_messcut' %}" class="btn btn-success btn-sm">Mess Cut</a>
-                    <a href="#" class="btn btn-success btn-sm">Pay Bill</a>
-                    <a href="{% url 'dashboard' %}" class="btn btn-success btn-sm">Dashboard</a>
+                    <div class="d-flex justify-content-evenly mb-4">
+                        <a href="{% url 'apply_for_messcut' %}" class="btn btn-success btn-sm">Mess Cut</a>
+                        <a href="{% url 'view_mess_bill' %}" class="btn btn-success btn-sm">Pay Bill</a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-success btn-sm">Details</a>
+                    </div>
                 </div>
             </div>
-
-
         {% endif %}
     </div>
 {% endblock %}

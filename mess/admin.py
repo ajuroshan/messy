@@ -12,10 +12,11 @@ class MesscutAdmin(admin.ModelAdmin):
 
 @admin.register(Messmenu)
 class MessmenuAdmin(admin.ModelAdmin):
-	list_display = ['date','breakfast','lunch','dinner']
-	list_filter = ['date','breakfast','lunch','dinner']
-	search_fields = ['date','breakfast','lunch','dinner']
+	list_display = ['day','breakfast','lunch','dinner']
+	list_filter = ['day','breakfast','lunch','dinner']
+	search_fields = ['day','breakfast','lunch','dinner']
 	list_per_page = 10
+
 
 
 @admin.register(MessAttendance)

@@ -14,13 +14,26 @@ class Messcut(models.Model):
 
 
 class Messmenu(models.Model):
-    date = models.DateField()
-    breakfast = models.TextField()
-    lunch = models.TextField()
-    dinner = models.TextField()
+    DAYS_OF_WEEK = [
+        ('monday', 'Monday'),
+        ('tuesday', 'Tuesday'),
+        ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'),
+        ('friday', 'Friday'),
+        ('saturday', 'Saturday'),
+        ('sunday', 'Sunday'),
+    ]
+
+    day = models.CharField(max_length=9, choices=DAYS_OF_WEEK, unique=True,blank=True, null=True)
+    breakfast = models.CharField(max_length=255)
+    lunch = models.CharField(max_length=255)
+    dinner = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ('day',)
 
     def __str__(self):
-        return f"Menu for {self.date}"
+        return f"{self.day.capitalize()}: Breakfast - {self.breakfast}, Lunch - {self.lunch}, Dinner - {self.dinner}"
 
 
 class MessAttendance(models.Model):
@@ -73,7 +86,8 @@ class MessBill(models.Model):
     mess_cuts = models.IntegerField(default=0)
     amount = models.IntegerField()
     month = models.DateField()
-    date_paid = models.DateField()
+    date_paid = models.DateField(null=True, blank=True)
     paid = models.BooleanField(default=False)
+    mess_cut = models.ManyToManyField(Messcut, blank=True)
     def __str__(self):
         return f"{self.amount}"
