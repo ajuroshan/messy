@@ -4,9 +4,11 @@ from .models import *
 from .forms import *
 from application.models import Application
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+import datetime
 # Create your views here.
-
-
+@login_required
 def apply_for_messcut(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	messcuts = application.messcuts.filter(start_date__month=date.today().month)
@@ -32,7 +34,7 @@ def apply_for_messcut(request):
 
 	return render(request, 'mess/apply.html', {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts})
 
-
+@login_required
 @csrf_exempt
 def mark_attendance(request):
 	if request.method == 'POST':
@@ -64,7 +66,7 @@ def mark_attendance(request):
 
 	return render(request, 'mess/scan_qr.html')
 
-
+@login_required
 def dashboard(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	return render(request, 'mess/dashboard.html', {'application': application})
@@ -104,7 +106,18 @@ def calculate_mess_bill():
 		# Save the application
 		application.save()
 
+@login_required
 def view_mess_bill(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
 	return render(request, 'mess/view_mess_bill.html', {'mess_bill': mess_bill})
+
+
+@login_required
+def weekly_menu(request):
+    weekly_menu = Messmenu.objects.all().order_by('id')  # Get the full week's menu
+
+    context = {
+        'weekly_menu': weekly_menu,
+    }
+    return render(request, 'mess/menu.html', context)

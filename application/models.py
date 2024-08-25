@@ -94,3 +94,8 @@ class Application(models.Model):
 class AcceptedApplication(Application):
     class Meta:
         proxy = True
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic = models.URLField(max_length=200, blank=True, null=True)

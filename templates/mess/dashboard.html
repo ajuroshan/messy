@@ -6,9 +6,9 @@
         <div class="card w-auto">
             <div class="card-body p-3">
                 <div class="d-flex flex-column align-items-center">
-                    <img src="{{ application.profile_pic.url }}" alt="Profile Picture" class="rounded-circle mb-3"
+                    <img src="{{ user.profile.profile_pic }}" alt="Profile Picture" class="rounded-circle mb-3"
                          style="width: 120px; height: 120px; object-fit: cover;">
-                    <h5 class="mb-0">{{ application.applicant.username|title }}</h5>
+                    <h5 class="mb-0">{{ application.applicant.first_name|title }} {{ application.applicant.last_name|title }}</h5>
                     <small class="text-muted">{{ application.department|upper }} {{ application.semester }}</small>
                 </div>
                 <table class="table table table-striped table-bordered mt-3  ">
