@@ -5,6 +5,8 @@ from .forms import *
 from application.models import Application
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
 
 import datetime
 # Create your views here.
@@ -34,35 +36,44 @@ def apply_for_messcut(request):
 
 	return render(request, 'mess/apply.html', {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts})
 
+
 @login_required
 @csrf_exempt
 def mark_attendance(request):
 	if request.method == 'POST':
+		print(request.POST)
 		qr_code_data = request.POST.get('qr_code_data')
+		mess_no = request.POST.get('mess_no')
+
+		if mess_no and not qr_code_data:
+			qr_code_data = mess_no
 
 		try:
 			qr_code_data = int(qr_code_data)
 		except ValueError:
-			return HttpResponse("Invalid QR Code")
+			return JsonResponse({"status": "error", "message": "Invalid QR Code"}, status=400)
 
 		# Find the application using the mess_no from the QR code
 		application = Application.objects.filter(mess_no=qr_code_data).first()
-		messcuts = application.messcuts.all()
 		if application:
+			messcuts = application.messcuts.all()
 			if messcuts:
 				for messcut in messcuts:
 					if messcut.start_date <= date.today() <= messcut.end_date:
-						return HttpResponse("You cannot mark attendance during a messcut period")
+						return JsonResponse(
+							{"status": "error", "message": "You cannot mark attendance during a messcut period"},
+							status=400)
 			else:
 				# Create the attendance record, linking it to the current user
 				try:
 					attendance = MessAttendance.objects.create(student=application)
 					attendance.save()
 				except Exception as e:
-					return HttpResponse(f"Attendance already marked {e}")
-				return HttpResponse("Attendance marked successfully")
+					return JsonResponse({"status": "error", "message": f"Attendance already marked: {e}"}, status=400)
+
+				return JsonResponse({"status": "success", "message": "Attendance marked successfully"})
 		else:
-			return HttpResponse("Application not found")
+			return JsonResponse({"status": "error", "message": "Application not found"}, status=404)
 
 	return render(request, 'mess/scan_qr.html')
 
@@ -110,7 +121,7 @@ def calculate_mess_bill():
 def view_mess_bill(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
-	return render(request, 'mess/view_mess_bill.html', {'mess_bill': mess_bill})
+	return render(request, 'mess/view_mess_bill.html', {'mess_bill': mess_bill,"application":application})
 
 
 @login_required

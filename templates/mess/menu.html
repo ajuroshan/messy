@@ -4,31 +4,50 @@
 {% block title %}Apply for MessCut{% endblock %}
 
 {% block content %}
-    <div class="text-center my-5 d-flex align-items-center justify-content-center ">
-        <div class="card w-100">
-            <h2 class="text-center my-4">Weekly Menu</h2>
-            <table class="table table-sm table-striped table-bordered">
-                <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>Breakfast</th>
-                    <th>Lunch</th>
-                    <th>Dinner</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for menu in weekly_menu %}
-                    <tr>
-                        <td>{{ menu.day|capfirst }}</td>
-                        <td>{{ menu.breakfast|title }}</td>
-                        <td>{{ menu.lunch|title }}</td>
-                        <td>{{ menu.dinner|title }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    <div class="bg-light py-3 py-md-5">
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-12 col-md-11 col-lg-8 col-xl-7 col-xxl-6">
+                    <div class="bg-white p-4 p-md-5 rounded shadow-sm">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-5">
+                                    <h3>Weekly Menu</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex">
+                                    <table class="table table-sm table-striped table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Breakfast</th>
+                                            <th>Lunch</th>
+                                            <th>Dinner</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for menu in weekly_menu %}
+                                            <tr>
+                                                <td>{{ menu.day|capfirst }}</td>
+                                                <td>{{ menu.breakfast|title }}</td>
+                                                <td>{{ menu.lunch|title }}</td>
+                                                <td>{{ menu.dinner|title }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
 
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
+
 {% endblock %}

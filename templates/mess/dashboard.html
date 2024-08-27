@@ -2,63 +2,74 @@
 
 {% block title %}Home{% endblock %}
 {% block content %}
-    <div class=" my-5 d-flex align-items-center justify-content-center">
-        <div class="card w-auto">
-            <div class="card-body p-3">
-                <div class="d-flex flex-column align-items-center">
-                    <img src="{{ user.profile.profile_pic }}" alt="Profile Picture" class="rounded-circle mb-3"
-                         style="width: 120px; height: 120px; object-fit: cover;">
-                    <h5 class="mb-0">{{ application.applicant.first_name|title }} {{ application.applicant.last_name|title }}</h5>
-                    <small class="text-muted">{{ application.department|upper }} {{ application.semester }}</small>
+    <div class="bg-light py-3 py-md-5">
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-12 col-md-11 col-lg-8 col-xl-7 col-xxl-6">
+                    <div class="bg-white p-4 p-md-5 rounded shadow-sm">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <img src="{{ user.profile.profile_pic }}" alt="Profile Picture"
+                                             class="rounded-circle mb-3"
+                                             style="width: 120px; height: 120px; object-fit: cover;">
+                                        <h5 class="mb-0">{{ application.applicant.first_name|title }} {{ application.applicant.last_name|title }}</h5>
+                                        <small class="text-muted">{{ application.department|upper }} {{ application.semester }}</small>
+                                    </div>
+                                    <table class="table table table-striped table-bordered mt-3  ">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col" class="text-left">Field</th>
+                                            <th scope="col" class="text-left">Value</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>{{ application.applicant.username|title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Department</td>
+                                            <td>{{ application.department|upper }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Semester</td>
+                                            <td>{{ application.semester }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mess No</td>
+                                            <td>{{ application.mess_no }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Hostel</td>
+                                            <td>{{ application.hostel }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Food Preference</td>
+                                            <td>{{ application.food_preference|title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Application Accepted</td>
+                                            <td>{{ application.accepted|yesno:"Yes,No" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Outmess</td>
+                                            <td>{{ application.outmess|yesno:"Yes,No" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Claim</td>
+                                            <td>{{ application.claim|yesno:"Yes,No" }}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <table class="table table table-striped table-bordered mt-3  ">
-                    <thead>
-                    <tr>
-                        <th scope="col" class="text-left">Field</th>
-                        <th scope="col" class="text-left">Value</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Name</td>
-                        <td>{{ application.applicant.username|title }}</td>
-                    </tr>
-                    <tr>
-                        <td>Department</td>
-                        <td>{{ application.department|upper }}</td>
-                    </tr>
-                    <tr>
-                        <td>Semester</td>
-                        <td>{{ application.semester }}</td>
-                    </tr>
-                    <tr>
-                        <td>Mess No</td>
-                        <td>{{ application.mess_no }}</td>
-                    </tr>
-                    <tr>
-                        <td>Hostel</td>
-                        <td>{{ application.hostel }}</td>
-                    </tr>
-                    <tr>
-                        <td>Food Preference</td>
-                        <td>{{ application.food_preference|title }}</td>
-                    </tr>
-                    <tr>
-                        <td>Application Accepted</td>
-                        <td>{{ application.accepted|yesno:"Yes,No" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Outmess</td>
-                        <td>{{ application.outmess|yesno:"Yes,No" }}</td>
-                    </tr>
-                    <tr>
-                        <td>Claim</td>
-                        <td>{{ application.claim|yesno:"Yes,No" }}</td>
-                    </tr>
-                    </tbody>
-                </table>
-
             </div>
         </div>
     </div>
+
 {% endblock %}
