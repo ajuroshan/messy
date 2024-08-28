@@ -1,19 +1,21 @@
-{% extends 'base.html' %}
+{% extends 'qr_base.html' %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
     <div class="container">
-        <h1 class="text-center my-4">Scan QR Code to Mark Attendance</h1>
+        <h6 class="text-center my-4 text-muted">Scan QR Code to Mark Attendance</h6>
         <div class="d-flex justify-content-center mb-4">
             <div id="qr-reader" style="width:100%"></div>
         </div>
         <div id="qr-reader-results" class="text-center mb-4"></div>
 
+        <div class="badge badge-pill badge-success" id="pastMessnos"></div>
+
         <form id="qr-form" class="text-center">
             {% csrf_token %}
             <input type="hidden" name="qr_code_data" id="qr_code_data">
-            <input type="number" name="mess_no" placeholder="Enter Mess No (optional)" class="form-control mb-3"
+            <input type="number" name="mess_no" placeholder="Enter Mess No" class="form-control mb-3"
                    style="max-width: 300px; margin: 0 auto;">
             <button type="button" class="btn btn-primary">Enter
             </button>
@@ -23,14 +25,18 @@
     <!-- Confirmation Modal -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true"
          data-bs-backdrop="false">
-        <div class="modal-dialog modal-fullscreen">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="confirmModalLabel">Confirm Attendance</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="modalBody">
-                    Are you sure you want to mark attendance with the QR Code and Mess No provided?
+
+                <div class="modal-body " id="modalBody">
+                    <h5 class="text-center" id="modelHeading"></h5>
+                    <h6 class="text-muted text-center" id="modelText"></h6>
+                    <h6 class="alert alert-success text-center" id="modalMessage"></h6>
+                    <h6 class="alert alert-danger text-center" id="modalMessageMesscut"></h6>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -61,12 +67,32 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    const modalBody = document.getElementById('modalBody');
-                    if (data.status === 'success' || data.status === 'have_messcut' || data.status === 'have_messduty') {
-                        modalBody.textContent = data.message;
+                    console.log(data)
+                    const modalMessage = document.getElementById('modalMessage');
+                    const modalMessageMesscut = document.getElementById('modalMessageMesscut');
+                    const modelHeading = document.getElementById('modelHeading');
+                    const modelText = document.getElementById('modelText');
+                    const pastMessnos = document.getElementById('pastMessnos');
+                    const past_mess_nos = document.createElement('span');
+                    if (data.app_details && Object.keys(data.app_details).length > 0) {
+                        modelHeading.textContent = `${data.app_details.full_name + " " + data.app_details.department}`;
+                        modelText.textContent = `${data.app_details.mess_no}`;
+                        past_mess_nos.textContent = `${data.app_details.mess_no}`;
+                        pastMessnos.appendChild(past_mess_nos)
                     } else {
-                        modalBody.textContent = data.message;
+                        modelHeading.textContent = '';
+                        modelText.textContent = ''
                     }
+                    modalMessage.textContent = data.message;
+                    if (data.messcut && Object.keys(data.messcut).length > 0) {
+
+                        modalMessageMesscut.textContent = `${data.messcut}`;
+                    } else {
+                        if (modalMessageMesscut) {
+                            modalMessageMesscut.remove();
+                        }
+                    }
+
                     // Show the modal
                     const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
                         backdrop: false
@@ -129,13 +155,32 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    const modalBody = document.getElementById('modalBody');
-                    if (data.status === 'success' || data.status === 'have_messcut' || data.status === 'have_messduty') {
-                        modalBody.textContent = data.message;
-                    } else {
-                        modalBody.textContent = data.message;
-                    }
+                    console.log(data)
+                    const modalMessage = document.getElementById('modalMessage');
+                    const modalMessageMesscut = document.getElementById('modalMessageMesscut');
 
+                    const modelHeading = document.getElementById('modelHeading');
+                    const modelText = document.getElementById('modelText');
+                    const pastMessnos = document.getElementById('pastMessnos');
+                    const past_mess_nos = document.createElement('span');
+                    if (data.app_details && Object.keys(data.app_details).length > 0) {
+                        modelHeading.textContent = `${data.app_details.full_name + " " + data.app_details.dept}`;
+                        modelText.textContent = `${data.app_details.mess_no}`;
+                        past_mess_nos.textContent = `${data.app_details.mess_no}`;
+                        pastMessnos.appendChild(past_mess_nos)
+                    } else {
+                        modelHeading.textContent = '';
+                        modelText.textContent = ''
+                    }
+                    modalMessage.textContent = `${data.message}`;
+                    if (data.messcut && Object.keys(data.messcut).length > 0) {
+
+                        modalMessageMesscut.textContent = `${data.messcut}`;
+                    } else {
+                        if (modalMessageMesscut) {
+                            modalMessageMesscut.remove();
+                        }
+                    }
                     // Show the modal
                     const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
                         backdrop: false
@@ -191,7 +236,5 @@
         let html5QrcodeScanner = new Html5QrcodeScanner(
             "qr-reader", {fps: 5, qrbox: 250});
         html5QrcodeScanner.render(onScanSuccess, onScanError);
-
-
     </script>
 {% endblock %}
