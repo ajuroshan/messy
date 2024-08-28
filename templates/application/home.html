@@ -76,48 +76,26 @@
                                                 <h5 class="mb-0">{{ application.applicant.first_name|title }} {{ application.applicant.last_name|title }}</h5>
                                                 <small class="text-muted">{{ application.department| upper }} {{ application.semester }}</small>
                                             </div>
-                                            <div class="card-text">
+                                            <div class="card-text d-flex justify-content-center">
                                                 <img src="{{ application.qr_code.url }}" alt="QR Code">
                                             </div>
                                             <h5 class="mb-3 text-muted text-center">Mess No:
                                                 <strong>{{ application.mess_no| title }}</strong></h5>
                                         </div>
                                     {% endif %}
-
-
                                 </div>
                             </div>
                         </div>
+
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
-{% endblock %}
-
-
-{% if menu_today %}
-    <div class="text-center">
-        <h5 class="mb-3">{{ date|date:"l jS F" }}</h5>
-        <div class="">
-            <table class=" table table-bordered ">
-                <thead>
-                <tr>
-                    <th>Breakfast</th>
-                    <th>Lunch</th>
-                    <th>Dinner</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{{ menu_today.breakfast|title }}</td>
-                    <td>{{ menu_today.lunch|title }}</td>
-                    <td>{{ menu_today.dinner|title }}</td>
-                </tr>
-                </tbody>
-            </table>
+    {% if mess_assistant %}
+        <div class="d-flex justify-content-center my-2">
+            <a href="{% url 'scan_qr' %}" class="btn btn-success btn-sm">Mark Attendance</a>
         </div>
-    </div>
-{% else %}
-    <p class="text-center">No menu available for today.</p>
-{% endif %}
+    {% endif %}
+{% endblock %}

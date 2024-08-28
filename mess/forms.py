@@ -39,6 +39,9 @@ class MesscutForm(forms.ModelForm):
 		start_date = cleaned_data.get('start_date')
 		end_date = cleaned_data.get('end_date')
 
+		# Calculate the total days for the current mess cut
+		current_messcut_days = (end_date - start_date).days + 1
+
 		if start_date and end_date:
 			# Ensure both dates are in the same month
 			if start_date.month != end_date.month or start_date.year != end_date.year:
@@ -48,10 +51,21 @@ class MesscutForm(forms.ModelForm):
 			if self.request:
 				applicant = Application.objects.filter(applicant=self.request.user, accepted=True).first()
 				if applicant:
-					existing_messcuts = applicant.messcuts.all()
-					for messcut in existing_messcuts:
-						if (start_date <= messcut.end_date and end_date >= messcut.start_date):
-							raise ValidationError("The mess cut dates overlap with an existing mess cut.")
+					# Get all mess cuts for the current month and year
+					existing_messcuts = applicant.messcuts.filter(
+						start_date__month=start_date.month,
+						start_date__year=start_date.year
+					)
+					if existing_messcuts:
+						total_messcut_days = sum(
+							(messcut.end_date - messcut.start_date).days + 1 for messcut in existing_messcuts
+						)
+						for messcut in existing_messcuts:
+							if (start_date <= messcut.end_date and end_date >= messcut.start_date):
+								raise ValidationError("The mess cut dates overlap with an existing mess cut.")
+						# Ensure the total mess cut days do not exceed 10 days
+						if total_messcut_days + current_messcut_days > 8:
+							raise ValidationError("The total number of mess cut days for the month cannot exceed 8 days.")
 
 		return cleaned_data
 

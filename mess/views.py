@@ -6,6 +6,7 @@ from application.models import Application
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.contrib.auth.decorators import user_passes_test
 
 import datetime
 
@@ -39,10 +40,30 @@ def apply_for_messcut(request):
 	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts})
 
 
+def group_required(group_name):
+	def in_group(user):
+		return user.is_authenticated and user.groups.filter(name=group_name).exists()
+
+	return user_passes_test(in_group, login_url='home', redirect_field_name=None)
+
+
+@group_required('mess_assistants')
 def scan_qr(request):
-	return render(request, 'mess/scan_qr.html')
+	current_time = timezone.localtime().time()
 
+	# Define meal times (local time)
+	breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
+	lunch_time = (time(12, 10), time(14, 45))  # Lunch is served from 12:10 PM to 12:45 PM
+	dinner_time = (time(20, 0), time(21, 0))  # Dinner is served from 8 PM to 9 PM
 
+	# Set meal based on current local time
+	if (breakfast_time[0] <= current_time < breakfast_time[1]) or (lunch_time[0] <= current_time < lunch_time[1]) or (
+			dinner_time[0] <= current_time < dinner_time[1]):
+		return render(request, 'mess/scan_qr.html', {'mealtime': True})
+	else:
+		return render(request, 'mess/scan_qr.html', {'mealtime': True})
+
+@group_required('mess_assistants')
 @login_required
 @csrf_exempt
 def mark_attendance(request):
@@ -64,13 +85,14 @@ def mark_attendance(request):
 				"app_details": {}
 			}, status=400)
 
-		# Find the application using the mess_no from the QR code
+		# Find the application using the mess_no farom the QR code
 		application = Application.objects.filter(mess_no=qr_code_data).first()
 		if application:
 			app_details = {
-				"full_name"   : f"{application.applicant.first_name + ' ' + application.applicant.last_name }",  # Adjust according to your model fields
-				"dept": str(application.department).upper(),
-				"mess_no": application.mess_no,
+				"full_name": f"{application.applicant.first_name + ' ' + application.applicant.last_name}",
+				# Adjust according to your model fields
+				"dept"     : str(application.department).upper(),
+				"mess_no"  : application.mess_no,
 			}
 			messcuts = application.messcuts.all()
 			if messcuts:
@@ -80,17 +102,39 @@ def mark_attendance(request):
 							"status"     : "error",
 							"message"    : "You cannot Mark Attendance during messcut period. ",
 							"app_details": app_details,
-							"messcut": f"\nMesscut from {messcut.start_date} to  {messcut.end_date} "
+							"messcut"    : f"\nMesscut from {messcut.start_date} to  {messcut.end_date} "
 						}, status=400)
 			elif confirm:
 				# Create the attendance record, linking it to the current user
 				try:
 					attendance = MessAttendance.objects.create(student=application)
 					attendance.save()
+					current_time = timezone.localtime().time()
+
+					# Define meal times (local time)
+					breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
+					lunch_time = (time(12, 10), time(14, 45))  # Lunch is served from 12:10 PM to 12:45 PM
+					dinner_time = (time(20, 0), time(21, 0))  # Dinner is served from 8 PM to 9 PM
+
+					MEAL_CHOICES = [
+						('breakfast', 'Breakfast'),
+						('lunch', 'Lunch'),
+						('dinner', 'Dinner'),
+					]
+					if breakfast_time[0] <= current_time < breakfast_time[1]:
+						meal = MEAL_CHOICES[0][1]
+					elif lunch_time[0] <= current_time < lunch_time[1]:
+						meal = MEAL_CHOICES[1][1]
+					elif dinner_time[0] <= current_time < dinner_time[1]:
+						meal = MEAL_CHOICES[2][1]
+					else:
+						meal = "No meal time"
+					meal_attendance = MessAttendance.objects.filter(meal=meal, date=date.today()).count()
 					return JsonResponse({
-						"status"     : "success",
-						"message"    : "Attendance marked successfully",
-						"app_details": app_details
+						"status"         : "success",
+						"message"        : "Attendance marked successfully",
+						"app_details"    : app_details,
+						"meal_attendance": meal_attendance
 					}, status=200)
 				except Exception as e:
 					return JsonResponse({
@@ -106,8 +150,8 @@ def mark_attendance(request):
 				}, status=400)
 		else:
 			return JsonResponse({
-				"status"     : "error",
-				"message"    : f"No Application found",
+				"status" : "error",
+				"message": f"No Application found",
 			}, status=400)
 	else:
 		return JsonResponse({
@@ -115,8 +159,6 @@ def mark_attendance(request):
 			"message"    : "Get req",
 			"app_details": {}
 		}, status=404)
-
-
 
 
 @login_required
@@ -127,16 +169,16 @@ def dashboard(request):
 
 def calculate_mess_bill():
 	# Constants
-	MONTH = date.today()
-	AMOUNT_PER_DAY = 90
-	ESTABLISHMENT_CHARGES = 300
-	TOTAL_DAYS = 30
-	OTHER_CHARGES = 0
-	FEAST_CHARGES = 0
+	MONTH = Messsettings.objects.first().month
+	AMOUNT_PER_DAY = Messsettings.objects.first().amount_per_day
+	ESTABLISHMENT_CHARGES = Messsettings.objects.first().establishment_charges
+	TOTAL_DAYS = Messsettings.objects.first().total_days
+	OTHER_CHARGES = Messsettings.objects.first().other_charges
+	FEAST_CHARGES = Messsettings.objects.first().feast_charges
 
 	for application in Application.objects.filter(accepted=True):
 		# Calculate the total amount
-		messcuts = application.messcuts.filter(start_date__month=date.today().month)
+		messcuts = application.messcuts.filter(start_date__month=MONTH)
 		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
 		effective_days = TOTAL_DAYS - total_messcut_days
 		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
@@ -163,9 +205,25 @@ def calculate_mess_bill():
 def view_mess_bill(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
-	return render(request, 'mess/view_mess_bill.html', {'mess_bill': mess_bill, "application": application})
+	details = Messsettings.objects.first()
 
 
+	return render(request, 'mess/view_mess_bill.html', {'mess_bill': mess_bill, "application": application, "details": details})
+
+
+
+def pay_mess_bill(request):
+	application = Application.objects.filter(applicant=request.user).first()
+	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
+
+	if request.method == 'POST':
+		mess_bill.paid = True
+		mess_bill.date_paid = date.today()
+		mess_bill.save()
+
+		return redirect('home')
+
+	return render(request, 'mess/pay_mess_bill.html', {'mess_bill': mess_bill, "application": application})
 @login_required
 def weekly_menu(request):
 	weekly_menu = Messmenu.objects.all().order_by('id')  # Get the full week's menu

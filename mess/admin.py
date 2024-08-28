@@ -19,6 +19,8 @@ class MessmenuAdmin(admin.ModelAdmin):
 
 
 
+
+
 @admin.register(MessAttendance)
 class MessAttendanceAdmin(admin.ModelAdmin):
 	list_display = ['meal','student','timestamp']
@@ -30,3 +32,11 @@ class MessBillAdmin(admin.ModelAdmin):
 	list_display = ['amount','month','paid']
 	list_filter = ['amount','month','paid']
 	search_fields = ['amount','month','paid']
+
+
+@admin.register(Messsettings)
+class MesssettingsAdmin(admin.ModelAdmin):
+	list_display = ['total_days','amount_per_day','establishment_charges','feast_charges','other_charges']
+	list_filter = ['total_days','amount_per_day','establishment_charges','feast_charges','other_charges']
+	search_fields = ['total_days','amount_per_day','establishment_charges','feast_charges','other_charges']
+	list_per_page = 10

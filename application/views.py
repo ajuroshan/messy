@@ -14,6 +14,7 @@ def home(request):
 	has_applied = Application.objects.filter(applicant=request.user).exists()
 	accepted = Application.objects.filter(applicant=request.user, accepted=True).exists()
 	application = Application.objects.filter(applicant=request.user).first()
+	mess_assistant = request.user.groups.filter(name='mess_assistants').exists()
 
 	today = datetime.datetime.now().strftime('%A').lower()  # Get today's day in lowercase
 	menu_today = Messmenu.objects.filter(day=today).first()
@@ -25,7 +26,8 @@ def home(request):
 		'weekly_menu': weekly_menu,
 		'has_applied': has_applied,
 		'accepted': accepted,
-		'application': application
+		'application': application,
+		'mess_assistant': mess_assistant
 	}
 	return render(request, 'application/home.html', context)
 

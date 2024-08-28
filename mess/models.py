@@ -47,7 +47,7 @@ class MessAttendance(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey('application.Application', on_delete=models.CASCADE,blank=True, null=True)
     class Meta:
-        unique_together = ('meal', 'student','date')
+        # unique_together = ('meal', 'student','date')
         ordering = ['timestamp']
 
     def save(self, *args, **kwargs):
@@ -60,14 +60,14 @@ class MessAttendance(models.Model):
         dinner_time = (time(20, 0), time(21, 0))   # Dinner is served from 8 PM to 9 PM
 
         # Set meal based on current local time
-        if breakfast_time[0] <= current_time < breakfast_time[1]:
-            self.meal = 'breakfast'
-        elif lunch_time[0] <= current_time < lunch_time[1]:
-            self.meal = 'lunch'
-        elif dinner_time[0] <= current_time < dinner_time[1]:
-            self.meal = 'dinner'
-        else:
-            raise ValueError("Meal time does not match any defined meal period")
+        # if breakfast_time[0] <= current_time < breakfast_time[1]:
+        #     self.meal = 'breakfast'
+        # elif lunch_time[0] <= current_time < lunch_time[1]:
+        #     self.meal = 'lunch'
+        # elif dinner_time[0] <= current_time < dinner_time[1]:
+        #     self.meal = 'dinner'
+        # else:
+        #     raise ValueError("Meal time does not match any defined meal period")
 
         super().save(*args, **kwargs)
 
@@ -91,3 +91,26 @@ class MessBill(models.Model):
     mess_cut = models.ManyToManyField(Messcut, blank=True)
     def __str__(self):
         return f"{self.amount}"
+
+
+class Messsettings(models.Model):
+    total_days = models.IntegerField(default=30)
+    amount_per_day = models.IntegerField(default=10)
+    establishment_charges = models.IntegerField(default=50)
+    feast_charges = models.IntegerField(default=0)
+    other_charges = models.IntegerField(default=0)
+    mess_secretary_upi_id = models.CharField(max_length=255)
+    mess_secretary_upi_id_link = models.CharField(max_length=255)
+    sagar_post_metric_upi_id = models.CharField(max_length=255)
+    sagar_post_metric_upi_id_link = models.CharField(max_length=255)
+    mess_secretary_upi_qr = models.ImageField(upload_to='upi_qr_codes', blank=True, null=True)
+    sagar_post_metric_upi_qr = models.ImageField(upload_to='upi_qr_codes', blank=True, null=True)
+    month_for_bill_calculation = models.DateField()
+    last_date_for_payment = models.DateField()
+    per_day_fine_after_due_date = models.IntegerField(default=0)
+    mess_secretary_name = models.CharField(max_length=10)
+    mess_secretary_contact = models.CharField(max_length=10)
+    assistant_mess_secretary_name = models.CharField(max_length=10)
+    assistant_mess_secretary_contact = models.CharField(max_length=10)
+    def __str__(self):
+        return f"{self.total_days} days, {self.amount_per_day} per day"
