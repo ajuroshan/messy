@@ -11,6 +11,8 @@
             <h3 class="my-3 text-center text-muted">Mess Bill for {{ messsettings.month_for_bill_calculation }}</h3>
             <div class="w-100 d-flex flex-row-reverse my-3 gap-2">
                 <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>
+                <a href="{% url 'send_mess_bill_mail_admin' %}" class="btn btn-primary btn-sm">Send Email</a>
+                <a href="{% url 'download_mess_bill_admin' %}" target="_blank" class="btn btn-primary btn-sm text-white">Download</a>
 
                 <form action="{% url 'view_mess_bill_admin' %}" method="POST">
                     {% csrf_token %}

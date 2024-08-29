@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -202,6 +203,7 @@ def view_mess_bill(request):
 	              {'mess_bill': mess_bill, "application": application, "details": details})
 
 
+@login_required
 def pay_mess_bill(request):
 	application = Application.objects.filter(applicant=request.user).first()
 	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
@@ -256,6 +258,7 @@ def mess_bill_admin(request):
 	return render(request, 'admin/mess_bill_admin.html', {'form': form})
 
 
+@staff_member_required
 def view_mess_bill_admin(request):
 	try:
 		# Assume there is only one Messsettings instance
@@ -278,6 +281,62 @@ def view_mess_bill_admin(request):
 
 	return render(request, 'admin/mess_bills_table.html',
 	              {'mess_bills': mess_bills, 'messsettings': messsettings})
+
+
+def send_mess_bill_mail_admin(request):
+	pass
+
+
+def download_mess_bill_admin(request):
+	try:
+		# Assume there is only one Messsettings instance
+		messsettings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return HttpResponse('Error: Messsettings instance not found')
+
+	# Create the HttpResponse object with the appropriate CSV header
+	response = HttpResponse(content_type='text/csv')
+	response[
+		'Content-Disposition'] = f"attachment; filename={messsettings.month_for_bill_calculation.month} Messbill.csv"
+
+	# Create a CSV writer
+	writer = csv.writer(response)
+
+	# Write the header row to the CSV file
+	writer.writerow(['Applicant', 'Mess No', 'Total Days', 'Effective Days', 'Amount Per Day',
+	                 'Establishment Charges', 'Feast Charges', 'Other Charges', 'Mess Cuts',
+	                 'Amount', 'Month', 'Date Paid', 'Paid'])
+
+	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
+		'application__mess_no')
+
+	for bill in mess_bills:
+		print(bill.application)
+
+	# Write data rows to the CSV file
+	for bill in mess_bills:
+		application = bill.application.last()  # Get the first related application
+		if application:
+			writer.writerow([
+				application.applicant.username,  # Applicant username
+				application.mess_no,  # Mess No
+				bill.total_days,  # Total Days
+				bill.effective_days,  # Effective Days
+				bill.amount_per_day,  # Amount Per Day
+				bill.establishment_charges,  # Establishment Charges
+				bill.feast_charges,  # Feast Charges
+				bill.other_charges,  # Other Charges
+				bill.mess_cuts,  # Mess Cuts
+				bill.amount,  # Amount
+				bill.month.strftime('%Y-%m'),  # Month
+				bill.date_paid.strftime('%Y-%m-%d') if bill.date_paid else 'N/A',  # Date Paid
+				'Yes' if bill.paid else 'No'  # Paid
+			])
+		else:
+			writer.writerow(['N/A'] * 13)  # Handle cases where the application does not exist
+
+	return response
 
 
 def calculate_mess_bill():
