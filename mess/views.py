@@ -1,5 +1,9 @@
 import csv
+import smtplib
 from datetime import datetime
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.template import loader
+from django.utils.html import strip_tags
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -12,6 +16,10 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Subquery, OuterRef
+from django.core.mail import EmailMessage
+from django.utils.html import strip_tags
+from django.template import loader
+from django.conf import settings
 
 from .forms import MesssettingsForm
 
@@ -284,7 +292,26 @@ def view_mess_bill_admin(request):
 
 
 def send_mess_bill_mail_admin(request):
-	pass
+	try:
+		# Assume there is only one Messsettings instance
+		messsettings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return HttpResponse('Error: Messsettings instance not found')
+
+	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
+		'application__mess_no')
+	for bill in mess_bills:
+		application = bill.application.last()
+		if application:
+			context = {
+				'subject': f"Monthly Mess Bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')}",
+				'message': f"Hello {application.applicant.first_name} {application.applicant.last_name}! The monthly mess bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')} is now available. Please click the link below to view your bill.",
+				'total_amount': bill.amount,
+				'action_url': 'https://youtube.com'
+			}
+			send_html_email(context['subject'], application.applicant.email, context)
+	return HttpResponse('Email sent successfully')
 
 
 def download_mess_bill_admin(request):
@@ -298,29 +325,30 @@ def download_mess_bill_admin(request):
 	# Create the HttpResponse object with the appropriate CSV header
 	response = HttpResponse(content_type='text/csv')
 	response[
-		'Content-Disposition'] = f"attachment; filename={messsettings.month_for_bill_calculation.month} Messbill.csv"
+		'Content-Disposition'] = f"attachment; filename={messsettings.month_for_bill_calculation.strftime('%B %Y')} Messbill.csv"
 
 	# Create a CSV writer
 	writer = csv.writer(response)
 
 	# Write the header row to the CSV file
-	writer.writerow(['Applicant', 'Mess No', 'Total Days', 'Effective Days', 'Amount Per Day',
+	writer.writerow(['Mess No', 'Name', 'Department', 'Semester', 'Total Days', 'Effective Days', 'Amount Per Day',
 	                 'Establishment Charges', 'Feast Charges', 'Other Charges', 'Mess Cuts',
-	                 'Amount', 'Month', 'Date Paid', 'Paid'])
+	                 'Total Amount', 'Paid', 'Date Paid'])
 
 	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
 		'application__mess_no')
 
-	for bill in mess_bills:
-		print(bill.application)
 
 	# Write data rows to the CSV file
 	for bill in mess_bills:
-		application = bill.application.last()  # Get the first related application
+		application = bill.application.last()  # Get the last related application
 		if application:
 			writer.writerow([
-				application.applicant.username,  # Applicant username
 				application.mess_no,  # Mess No
+				f"{str(application.applicant.first_name).title()} {str(application.applicant.last_name).title()} " if application.applicant.first_name and application.applicant.last_name else application.applicant.first_name,
+				# Applicant username
+				str(application.department).upper() if application.department else application.department,  # Department
+				application.semester,  # Semester
 				bill.total_days,  # Total Days
 				bill.effective_days,  # Effective Days
 				bill.amount_per_day,  # Amount Per Day
@@ -329,9 +357,8 @@ def download_mess_bill_admin(request):
 				bill.other_charges,  # Other Charges
 				bill.mess_cuts,  # Mess Cuts
 				bill.amount,  # Amount
-				bill.month.strftime('%Y-%m'),  # Month
-				bill.date_paid.strftime('%Y-%m-%d') if bill.date_paid else 'N/A',  # Date Paid
-				'Yes' if bill.paid else 'No'  # Paid
+				'Yes' if bill.paid else 'No',  # Paid
+				bill.date_paid.strftime('%Y-%m-%d') if bill.date_paid else 'N/A'  # Date Paid
 			])
 		else:
 			writer.writerow(['N/A'] * 13)  # Handle cases where the application does not exist
@@ -383,4 +410,55 @@ def calculate_mess_bill():
 		# Save the application if needed (if changes made to application itself)
 		application.save()
 
+
+def send_html_email(subject, to_email, context):
+	# Load the template
+	html_template = loader.get_template('email/email_template.html')
+
+	# Render the template with context
+	html_content = html_template.render(context)
+
+	# Strip the HTML content to create a plain text version
+	text_content = strip_tags(html_content)
+
+	# Create the email
+	email = EmailMultiAlternatives(
+		subject=subject,
+		body=text_content,  # Plain text content for email clients that don't support HTML
+		from_email=settings.EMAIL_HOST_USER,
+		to=[to_email]
+	)
+
+	# Attach the HTML content as an alternative
+	email.attach_alternative(html_content, "text/html")
+
+	# Send the email
+	email.send()
+
+
+
+
 # TODO: Implement functionality for exporting bill data to CSV if required
+
+#
+# def send_custom_email(subject, message, recipient_email, action_url):
+# 	s = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+# 	s.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+#
+# 	# Create the email message container
+# 	msg = MIMEMultipart('alternative')
+# 	msg['Subject'] = subject
+# 	msg['From'] = settings.EMAIL_HOST_USER
+# 	msg['To'] = recipient_email
+#
+# 	template = loader.get_template('email/email_template.html')
+# 	context = {'action_url': action_url}
+# 	html_content = template.render(context)
+#
+# 	part1 = MIMEText(message, 'plain')
+# 	part2 = MIMEText(html_content, 'html')
+# 	msg.attach(part1)
+# 	msg.attach(part2)
+#
+# 	s.sendmail(settings.EMAIL_HOST_USER, recipient_email, msg.as_string())
+# 	s.quit()

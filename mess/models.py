@@ -126,5 +126,6 @@ class Messsettings(models.Model):
 	dinner_start_time = models.TimeField()
 	dinner_end_time = models.TimeField()
 
+
 	def __str__(self):
 		return f"{self.total_days} days, {self.amount_per_day} per day"

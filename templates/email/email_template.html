@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: #ffffff !important; /* Ensure text color is white */
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .invoice-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .invoice-section h2 {
+            color: #333333;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .invoice-section p {
+            color: #555555;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <h1>{{ subject }}</h1>
+    <p>{{ message }}</p>
+
+    <!-- Invoice Section -->
+    <div class="invoice-section">
+        <p>Thank you for settling your hostel mess bill. Please find the details of your total amount below.</p>
+        <p class="total-amount"><strong> Total Amount: {{ total_amount }}/-</strong></p>
+    </div>
+    <a href="{{ action_url }}" class="btn">Pay Now</a>
+</div>
+</body>
+</html>
