@@ -46,6 +46,8 @@ class MesscutForm(forms.ModelForm):
 			# Ensure both dates are in the same month
 			if start_date.month != end_date.month or start_date.year != end_date.year:
 				raise ValidationError("The start and end dates must be in the same month.")
+			if start_date.month != date.today().month or start_date.year != date.today().year:
+				raise ValidationError("The start date must be in the current month.")
 			current_messcut_days = (end_date - start_date).days + 1
 
 			# Check for overlapping mess cuts

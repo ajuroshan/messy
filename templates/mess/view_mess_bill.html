@@ -94,17 +94,34 @@
 
                                         <h6 class="text-center mt-4">Scan the QR Code to Pay</h6>
 
-                                        <div class="d-flex justify-content-center px-5 py-3">
-                                            <img class="img-fluid" src="{{ details.mess_secretary_upi_qr.url }}"
-                                                 alt="QR Code">
-                                        </div>
-                                        <h6 class="text-center">UPI ID : <span class="badge badge-pill bg-success">ajuaju0483@okaxis</span>
-                                        </h6>
+                                        {% if not application.official_outmess %}
+                                            <div class="d-flex justify-content-center px-5 py-3">
+                                                <img class="img-fluid" src="{{ details.mess_secretary_upi_qr.url }}"
+                                                     alt="QR Code">
+                                            </div>
+                                            <h6 class="text-center">UPI ID :
+                                                <span class="badge badge-pill bg-success">{{ details.mess_secretary_upi_id }}</span>
+                                            </h6>
+                                            <div class="d-flex justify-content-center my-3">
+                                                <a href="{{ details.mess_secretary_upi_id_link }}"
+                                                   class="btn btn-danger text-light btn-sm w-100" target="_blank">UPI
+                                                    Link</a>
+                                            </div>
 
-                                        <div class="d-flex justify-content-center my-3">
-                                            <a href="{% url 'pay_mess_bill' %}"
-                                               class="btn btn-danger text-light btn-sm w-100">UPI Link</a>
-                                        </div>
+                                        {% else %}
+                                            <div class="d-flex justify-content-center px-5 py-3">
+                                                <img class="img-fluid" src="{{ details.sagar_post_metric_upi_qr.url }}"
+                                                     alt="QR Code">
+                                            </div>
+                                            <h6 class="text-center">UPI ID :
+                                                <span class="badge badge-pill bg-success">{{ details.sagar_post_metric_upi_id }}</span>
+                                            </h6>
+                                            <div class="d-flex justify-content-center my-3">
+                                                <a href="{{ details.sagar_post_metric_upi_id_link }}"
+                                                   class="btn btn-danger text-light btn-sm w-100" target="_blank">UPI
+                                                    Link</a>
+                                            </div>
+                                        {% endif %}
 
                                         {% if details.publish_mess_bill %}
 

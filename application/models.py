@@ -58,6 +58,7 @@ class Application(models.Model):
 	attendance = models.ManyToManyField(MessAttendance, blank=True)
 	mess_bill = models.ManyToManyField(MessBill, blank=True,related_name='application')
 	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+	official_outmess = models.BooleanField(default=False)
 
 	def __str__(self):
 		return str(self.applicant.username + ' - ' + str(self.mess_no))

@@ -33,7 +33,9 @@ def apply_for_messcut(request):
 				applicant.messcuts.add(messcut)  # Add the Messcut to the applicant's messcuts
 				applicant.save()  # Save the Application instance to update the M2M relationship
 
-				return redirect('home')
+				return render(request, 'mess/apply.html',
+				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
+				               'message': 'Messcut applied successfully'})
 			else:
 				# Handle the case where no accepted application exists
 				return HttpResponse("You need to apply for a mess first")
@@ -55,17 +57,19 @@ def group_required(group_name):
 def scan_qr(request):
 	current_time = timezone.localtime().time()
 
-	# Define meal times (local time)
-	breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
-	lunch_time = (time(12, 10), time(14, 45))  # Lunch is served from 12:10 PM to 12:45 PM
-	dinner_time = (time(20, 0), time(21, 0))  # Dinner is served from 8 PM to 9 PM
+	# Fetch meal times from Messsettings
+	try:
+		mess_settings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return HttpResponse('Error: Messsettings instance not found')
 
-	# Set meal based on current local time
-	if (breakfast_time[0] <= current_time < breakfast_time[1]) or (lunch_time[0] <= current_time < lunch_time[1]) or (
-			dinner_time[0] <= current_time < dinner_time[1]):
-		return render(request, 'mess/scan_qr.html', {'mealtime': True})
-	else:
-		return render(request, 'mess/scan_qr.html', {'mealtime': True})
+	# Set mealtime to True if the current time falls within any meal period
+	mealtime = (mess_settings.breakfast_start_time <= current_time < mess_settings.breakfast_end_time) or \
+	           (mess_settings.lunch_start_time <= current_time < mess_settings.lunch_end_time) or \
+	           (mess_settings.dinner_start_time <= current_time < mess_settings.dinner_end_time)
+
+	return render(request, 'mess/scan_qr.html', {'mealtime': mealtime})
 
 
 @group_required('mess_assistants')
@@ -79,25 +83,18 @@ def mark_attendance(request):
 		confirm = request.POST.get('confirm') == 'true'
 		current_time = timezone.localtime().time()
 
-		# Define meal times (local time)
-		breakfast_time = (time(8, 0), time(10, 0))
-		lunch_time = (time(12, 10), time(14, 45))
-		dinner_time = (time(16, 0), time(21, 0))
+		# Fetch meal times from Messsettings
+		mess_settings = Messsettings.objects.first()
 
-		MEAL_CHOICES = [
-			('breakfast', 'Breakfast'),
-			('lunch', 'Lunch'),
-			('dinner', 'Dinner'),
-		]
-
-		if breakfast_time[0] <= current_time < breakfast_time[1]:
-			meal = MEAL_CHOICES[0][0]
-		elif lunch_time[0] <= current_time < lunch_time[1]:
-			meal = MEAL_CHOICES[1][0]
-		elif dinner_time[0] <= current_time < dinner_time[1]:
-			meal = MEAL_CHOICES[2][0]
+		# Set meal based on current local time
+		if mess_settings.breakfast_start_time <= current_time < mess_settings.breakfast_end_time:
+			meal = 'breakfast'
+		elif mess_settings.lunch_start_time <= current_time < mess_settings.lunch_end_time:
+			meal = 'lunch'
+		elif mess_settings.dinner_start_time <= current_time < mess_settings.dinner_end_time:
+			meal = 'dinner'
 		else:
-			meal = "No meal time"
+			meal = None
 
 		meal_attendance = MessAttendance.objects.filter(
 			meal=meal,
