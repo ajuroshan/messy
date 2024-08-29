@@ -90,9 +90,12 @@ class MessBill(models.Model):
     mess_cuts = models.IntegerField(default=0)
     amount = models.IntegerField()
     month = models.DateField()
+
     date_paid = models.DateField(null=True, blank=True)
     paid = models.BooleanField(default=False)
-    mess_cut = models.ManyToManyField(Messcut, blank=True)
+    screenshot = models.ImageField(upload_to='payment_screenshots', blank=True, null=True)
+    fine_paid = models.IntegerField(default=0)
+    amount_paid = models.IntegerField(default=0)
     def __str__(self):
         return f"{self.amount}"
 
@@ -116,5 +119,6 @@ class Messsettings(models.Model):
     mess_secretary_contact = models.CharField(max_length=10)
     assistant_mess_secretary_name = models.CharField(max_length=10)
     assistant_mess_secretary_contact = models.CharField(max_length=10)
+    publish_mess_bill = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.total_days} days, {self.amount_per_day} per day"

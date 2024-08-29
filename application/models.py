@@ -56,7 +56,7 @@ class Application(models.Model):
 	claim = models.BooleanField(default=False)
 	qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 	attendance = models.ManyToManyField(MessAttendance, blank=True)
-	mess_bill = models.ManyToManyField(MessBill, blank=True)
+	mess_bill = models.ManyToManyField(MessBill, blank=True,related_name='application')
 	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
 	def __str__(self):

@@ -9,6 +9,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Subquery, OuterRef
+
+from .forms import MesssettingsForm
 
 
 # Create your views here.
@@ -185,44 +189,16 @@ def dashboard(request):
 	return render(request, 'mess/dashboard.html', {'application': application})
 
 
-def calculate_mess_bill():
-	# Constants
-	MONTH = Messsettings.objects.first().month
-	AMOUNT_PER_DAY = Messsettings.objects.first().amount_per_day
-	ESTABLISHMENT_CHARGES = Messsettings.objects.first().establishment_charges
-	TOTAL_DAYS = Messsettings.objects.first().total_days
-	OTHER_CHARGES = Messsettings.objects.first().other_charges
-	FEAST_CHARGES = Messsettings.objects.first().feast_charges
-
-	for application in Application.objects.filter(accepted=True):
-		# Calculate the total amount
-		messcuts = application.messcuts.filter(start_date__month=MONTH)
-		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
-		effective_days = TOTAL_DAYS - total_messcut_days
-		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
-		mess_bill = application.mess_bill.create(
-			amount=total_amount,
-			month=MONTH,
-			paid=False,
-			effective_days=effective_days,
-			amount_per_day=AMOUNT_PER_DAY,
-			establishment_charges=ESTABLISHMENT_CHARGES,
-			other_charges=OTHER_CHARGES,
-			feast_charges=FEAST_CHARGES,
-			total_days=TOTAL_DAYS,
-			mess_cuts=total_messcut_days
-		)
-		# Add the mess cuts to the mess_bill's messcuts field
-		mess_bill.mess_cut.add(*messcuts)
-
-		# Save the application
-		application.save()
-
-
 @login_required
 def view_mess_bill(request):
+	try:
+		# Assume there is only one Messsettings instance
+		messsettings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return redirect('some_error_page')
 	application = Application.objects.filter(applicant=request.user).first()
-	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
+	mess_bill = application.mess_bill.filter(month__month=messsettings.month_for_bill_calculation.month).last()
 	details = Messsettings.objects.first()
 
 	return render(request, 'mess/view_mess_bill.html',
@@ -234,13 +210,19 @@ def pay_mess_bill(request):
 	mess_bill = application.mess_bill.filter(month__month=date.today().month).last()
 
 	if request.method == 'POST':
-		mess_bill.paid = True
-		mess_bill.date_paid = date.today()
-		mess_bill.save()
+		form = PayMessBillForm(request.POST, request.FILES, instance=mess_bill)
+		if form.is_valid():
+			mess_bill = form.save(commit=False)
+			mess_bill.paid = True
+			mess_bill.date_paid = date.today()
+			mess_bill.save()
 
-		return redirect('home')
+			return redirect('home')
+	else:
+		form = PayMessBillForm(instance=mess_bill)
 
-	return render(request, 'mess/pay_mess_bill.html', {'mess_bill': mess_bill, "application": application})
+	return render(request, 'mess/pay_mess_bill.html',
+	              {'form': form, 'mess_bill': mess_bill, "application": application})
 
 
 @login_required
@@ -251,3 +233,98 @@ def weekly_menu(request):
 		'weekly_menu': weekly_menu,
 	}
 	return render(request, 'mess/menu.html', context)
+
+
+@staff_member_required
+def mess_bill_admin(request):
+	try:
+		# Assume there is only one Messsettings instance
+		messsettings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return HttpResponse('Error: Messsettings instance not found')
+
+	if request.method == 'POST':
+		form = MesssettingsForm(request.POST, request.FILES, instance=messsettings)
+		if form.is_valid():
+			form.save()
+			calculate_mess_bill()
+			return redirect('view_mess_bill_admin')
+		else:
+			return HttpResponse('Error: Invalid form data')
+
+	else:
+		form = MesssettingsForm(instance=messsettings)
+
+	return render(request, 'admin/mess_bill_admin.html', {'form': form})
+
+
+def view_mess_bill_admin(request):
+	try:
+		# Assume there is only one Messsettings instance
+		messsettings = Messsettings.objects.first()
+	except Messsettings.DoesNotExist:
+		# Handle case where no Messsettings instance exists
+		return HttpResponse('Error: Messsettings instance not found')
+
+	if request.method == 'POST':
+		publish = request.POST.get('publish') == 'true'  # Check if the publish button was clicked
+		if publish:
+			messsettings.publish_mess_bill = True
+		else:
+			messsettings.publish_mess_bill = False
+		messsettings.save()
+
+	subquery = Application.objects.filter(mess_bill=OuterRef('pk')).order_by('mess_no').values('mess_no')[:1]
+	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).annotate(
+		mess_no=Subquery(subquery)).order_by('mess_no')
+
+	return render(request, 'admin/mess_bills_table.html',
+	              {'mess_bills': mess_bills, 'messsettings': messsettings})
+
+
+def calculate_mess_bill():
+	# Fetch Messsettings only once
+	messsettings = Messsettings.objects.first()
+	if not messsettings:
+		raise ValueError("Messsettings instance is required to calculate mess bills.")
+
+	# Constants
+	MONTH = messsettings.month_for_bill_calculation.month
+	AMOUNT_PER_DAY = messsettings.amount_per_day
+	ESTABLISHMENT_CHARGES = messsettings.establishment_charges
+	TOTAL_DAYS = messsettings.total_days
+	OTHER_CHARGES = messsettings.other_charges
+	FEAST_CHARGES = messsettings.feast_charges
+
+	mess_bills = MessBill.objects.filter(month__month=MONTH)
+	if mess_bills.exists():
+		mess_bills.delete()
+
+	# Iterate through accepted applications
+	for application in Application.objects.filter(accepted=True):
+		# Calculate total messcut days for the given month
+		messcuts = application.messcuts.filter(start_date__month=MONTH)
+		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+
+		# Calculate effective days and total amount
+		effective_days = TOTAL_DAYS - total_messcut_days
+		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
+
+		# Create the mess bill
+		mess_bill = application.mess_bill.get_or_create(
+			amount=total_amount,
+			month=messsettings.month_for_bill_calculation,
+			paid=False,
+			effective_days=effective_days,
+			amount_per_day=AMOUNT_PER_DAY,
+			establishment_charges=ESTABLISHMENT_CHARGES,
+			other_charges=OTHER_CHARGES,
+			feast_charges=FEAST_CHARGES,
+			total_days=TOTAL_DAYS,
+			mess_cuts=total_messcut_days
+		)
+		# Save the application if needed (if changes made to application itself)
+		application.save()
+
+# TODO: Implement functionality for exporting bill data to CSV if required

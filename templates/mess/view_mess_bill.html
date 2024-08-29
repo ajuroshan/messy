@@ -11,7 +11,11 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <h3>Mess Bill for {{ mess_bill.month|date:"F Y" }}</h3>
+                                    {% if details.publish_mess_bill %}
+                                        <h3>Mess Bill for {{ mess_bill.month|date:"F Y" }}</h3>
+                                    {% else %}
+                                        <h3>Mess Bill Not Published</h3>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -27,65 +31,96 @@
                             <div class="col-12">
                                 <div class="d-flex">
                                     <div class="w-100">
-                                        <table class="table table-striped table-bordered mt-3">
-                                            <thead>
-                                            <tr>
-                                                <th scope="col" class="text-left">Field</th>
-                                                <th scope="col" class="text-left">Value</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>Total Days</td>
-                                                <td>{{ mess_bill.total_days|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Effective Days</td>
-                                                <td>{{ mess_bill.effective_days|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Amount Per Day</td>
-                                                <td>{{ mess_bill.amount_per_day|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Establishment Charges</td>
-                                                <td>{{ mess_bill.establishment_charges|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Feast Charges</td>
-                                                <td>{{ mess_bill.feast_charges|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Other Charges</td>
-                                                <td>{{ mess_bill.other_charges|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Mess Cuts</td>
-                                                <td>{{ mess_bill.mess_cuts|default:"0" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Total Amount</td>
-                                                <td><strong>{{ mess_bill.amount|default:"0" }}/-</strong></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Paid</td>
-                                                <td>{{ mess_bill.paid|yesno:"Yes,No" }}</td>
-                                            </tr>
-                                            {% if mess_bill.paid %}
+                                        {% if details.publish_mess_bill %}
+                                            <table class="table table-striped table-bordered mt-3">
+                                                <thead>
                                                 <tr>
-                                                    <td>Date Paid</td>
-                                                    <td>{{ mess_bill.date_paid|date:"d-m-Y"|default:"Not Paid" }}</td>
+                                                    <th scope="col" class="text-left">Field</th>
+                                                    <th scope="col" class="text-left">Value</th>
                                                 </tr>
-                                            {% endif %}
-                                            </tbody>
-                                        </table>
-                                        <div class="d-flex justify-content-center">
-                                            <img src="{% static 'images/messy_logo.png' %}" alt="QR Code">
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>Total Days</td>
+                                                    <td>{{ mess_bill.total_days|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Effective Days</td>
+                                                    <td>{{ mess_bill.effective_days|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Amount Per Day</td>
+                                                    <td>{{ mess_bill.amount_per_day|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Establishment Charges</td>
+                                                    <td>{{ mess_bill.establishment_charges|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Feast Charges</td>
+                                                    <td>{{ mess_bill.feast_charges|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Other Charges</td>
+                                                    <td>{{ mess_bill.other_charges|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mess Cuts</td>
+                                                    <td>{{ mess_bill.mess_cuts|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Amount</td>
+                                                    <td><strong>{{ mess_bill.amount|default:"0" }}/-</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Paid</td>
+                                                    <td>
+                                                        {% if mess_bill.paid %}
+                                                            <span class="badge bg-success">Yes</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">No</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% if mess_bill.paid %}
+                                                    <tr>
+                                                        <td>Date Paid</td>
+                                                        <td>{{ mess_bill.date_paid|date:"d-m-Y"|default:"Not Paid" }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
+
+                                        <h6 class="text-center mt-4">Scan the QR Code to Pay</h6>
+
+                                        <div class="d-flex justify-content-center px-5 py-3">
+                                            <img class="img-fluid" src="{{ details.mess_secretary_upi_qr.url }}"
+                                                 alt="QR Code">
+                                        </div>
+                                        <h6 class="text-center">UPI ID : <span class="badge badge-pill bg-success">ajuaju0483@okaxis</span>
+                                        </h6>
+
+                                        <div class="d-flex justify-content-center my-3">
+                                            <a href="{% url 'pay_mess_bill' %}"
+                                               class="btn btn-danger text-light btn-sm w-100">UPI Link</a>
                                         </div>
 
-                                        <div class="d-flex justify-content-evenly">
-                                            <a href="#" class="btn btn-danger btn-sm w-100">Pay Now</a>
-                                        </div>
+                                        {% if details.publish_mess_bill %}
+
+                                            <div class="d-flex justify-content-evenly my-2">
+                                                {% if not mess_bill.paid %}
+                                                    <a href="{% url 'pay_mess_bill' %}"
+                                                       class="btn btn-primary btn-sm w-100">Upload Screenshot</a>
+                                                {% else %}
+                                                    <a href="{% url 'pay_mess_bill' %}"
+                                                       class="btn btn-success btn-sm w-100">View Screenshot</a>
+                                                {% endif %}
+
+                                            </div>
+                                        {% endif %}
+
+
                                     </div>
                                 </div>
                             </div>

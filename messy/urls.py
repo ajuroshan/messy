@@ -20,11 +20,16 @@ from django.conf.urls.static import static
 
 from django.conf import settings
 
+from mess.views import mess_bill_admin, view_mess_bill_admin
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('application.urls')),
-    path('mess/',include('mess.urls')),
-    path('accounts/', include('allauth.urls')),
+	path('admin/mess_bill_admin/', mess_bill_admin, name='mess_bill_admin'),
+	path('admin/view_mess_bill_admin/', view_mess_bill_admin, name='view_mess_bill_admin'),
+
+	path('admin/', admin.site.urls),
+	path('', include('application.urls')),
+	path('mess/', include('mess.urls')),
+	path('accounts/', include('allauth.urls')),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
