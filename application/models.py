@@ -39,8 +39,8 @@ semester_choices = [
 	('S7', 'S7'),
 	('S8', 'S8'),
 
-
 ]
+
 
 class Application(models.Model):
 	applicant = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -58,8 +58,6 @@ class Application(models.Model):
 	attendance = models.ManyToManyField(MessAttendance, blank=True)
 	mess_bill = models.ManyToManyField(MessBill, blank=True)
 	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-
-
 
 	def __str__(self):
 		return str(self.applicant.username + ' - ' + str(self.mess_no))
@@ -92,10 +90,10 @@ class Application(models.Model):
 
 
 class AcceptedApplication(Application):
-    class Meta:
-        proxy = True
+	class Meta:
+		proxy = True
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_pic = models.URLField(max_length=200, blank=True, null=True)
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	profile_pic = models.URLField(max_length=200, blank=True, null=True)

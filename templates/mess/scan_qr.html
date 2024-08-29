@@ -16,8 +16,9 @@
                 <div id="qr-reader" style="width:100%"></div>
             </div>
             <div id="qr-reader-results" class="text-center mb-4"></div>
-            <h6 class="my-2 text-center text-muted">Attendance : <span class="badge bg-danger" id="attendance_count"></span></h6>
-            <h6 class="my-2 text-muted">Recent Student</h6>
+            <h6 class="my-2 text-center text-muted">Attendance : <span class="badge bg-danger"
+                                                                       id="attendance_count"></span></h6>
+            <h6 class="my-2 text-muted">Recent Entry</h6>
             <div id="pastMessnos">
                 <span class="badge bg-success" id="past_mess_nos"></span>
             </div>
@@ -28,6 +29,7 @@
                 <input type="number" name="mess_no" placeholder="Enter Mess No" class="form-control my-3 mx-0 w-100">
                 <button type="button" id="manual_mess_no_submit" class="btn btn-primary w-100">Enter
                 </button>
+                <div class="alert alert-success my-4" id="finalMessage"></div>
             </form>
         </div>
 
@@ -142,7 +144,7 @@
                             past_mess_nos.className = 'badge bg-success mx-1';
                             const attendance_count = document.getElementById('attendance_count');
                             attendance_count.className = 'badge bg-danger';
-
+                            const finalMessage = document.getElementById('finalMessage');
 
                             fetch("{% url 'mark_attendance' %}", {
                                 method: 'POST',
@@ -153,17 +155,25 @@
                             })
                                 .then(response => response.json())
                                 .then(data => {
-                                    form.reset();
+
                                     console.log(data);
                                     if (data.status === 'success') {
-                                        console.log(data.message);
-                                        past_mess_nos.textContent = `${data.app_details.mess_no}`;
+                                        console.log(data);
+                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
+                                        past_mess_nos.textContent = formData.get('qr_code_data');
                                         attendance_count.textContent = `${data.meal_attendance}`;
+                                        finalMessage.textContent = `${data.message}`;
+                                        finalMessage.className = 'alert alert-success my-4';
+                                        form.reset();
                                         modal.hide();
                                     } else {
                                         console.log(data.message); // You might want to use a more elegant notification
-                                        past_mess_nos.textContent = "";
-                                        attendance_count.textContent = "";
+                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
+                                        past_mess_nos.textContent = formData.get('qr_code_data');
+                                        attendance_count.textContent = `${data.meal_attendance}`;
+                                        finalMessage.textContent = `${data.message}`;
+                                        finalMessage.className = 'alert alert-danger my-4';
+                                        form.reset();
                                         modal.hide();
                                     }
 
@@ -259,6 +269,7 @@
                             past_mess_nos.className = 'badge bg-success mx-1';
                             const attendance_count = document.getElementById('attendance_count');
                             attendance_count.className = 'badge bg-danger';
+                            const finalMessage = document.getElementById('finalMessage');
 
 
                             fetch("{% url 'mark_attendance' %}", {
@@ -270,17 +281,24 @@
                             })
                                 .then(response => response.json())
                                 .then(data => {
-                                    form.reset();
                                     if (data.status === 'success') {
                                         console.log(data.message);
-                                        past_mess_nos.textContent = `${data.app_details.mess_no}`;
+                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
+                                        past_mess_nos.textContent = formData.get('mess_no');
                                         attendance_count.textContent = `${data.meal_attendance}`;
+                                        finalMessage.textContent = `${data.message}`;
+                                        finalMessage.className = 'alert alert-success my-4';
                                         modal.hide();
+                                        form.reset();
                                     } else {
                                         console.log(data.message); // You might want to use a more elegant notification
-                                        past_mess_nos.textContent = "";
-                                        attendance_count.textContent = "";
+                                        past_mess_nos.textContent = formData.get('mess_no');
+                                        attendance_count.textContent = `${data.meal_attendance}`;
+                                        finalMessage.textContent = `${data.message}`;
+                                        finalMessage.className = 'alert alert-danger my-4';
+
                                         modal.hide();
+                                        form.reset();
                                     }
                                     document.getElementById('qr_code_data').value = '';
                                     confirmButton.removeEventListener('click', handleConfirmClick); // Remove listener after execution

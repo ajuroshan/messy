@@ -47,7 +47,7 @@ class MessAttendance(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey('application.Application', on_delete=models.CASCADE,blank=True, null=True)
     class Meta:
-        # unique_together = ('meal', 'student','date')
+        unique_together = ('meal', 'student','date')
         ordering = ['timestamp']
 
     def save(self, *args, **kwargs):
@@ -55,19 +55,23 @@ class MessAttendance(models.Model):
         current_time = timezone.localtime().time()
 
         # Define meal times (local time)
+        # breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
+        # lunch_time = (time(12, 10), time(14, 45))    # Lunch is served from 12:10 PM to 12:45 PM
+        # dinner_time = (time(20, 0), time(21, 0))   # Dinner is served from 8 PM to 9 PM
+
         breakfast_time = (time(8, 0), time(10, 0))  # Breakfast is served from 8 AM to 10 AM
         lunch_time = (time(12, 10), time(14, 45))    # Lunch is served from 12:10 PM to 12:45 PM
-        dinner_time = (time(20, 0), time(21, 0))   # Dinner is served from 8 PM to 9 PM
+        dinner_time = (time(16, 0), time(21, 0))   # Dinner is served from 8 PM to 9 PM
 
-        # Set meal based on current local time
-        # if breakfast_time[0] <= current_time < breakfast_time[1]:
-        #     self.meal = 'breakfast'
-        # elif lunch_time[0] <= current_time < lunch_time[1]:
-        #     self.meal = 'lunch'
-        # elif dinner_time[0] <= current_time < dinner_time[1]:
-        #     self.meal = 'dinner'
-        # else:
-        #     raise ValueError("Meal time does not match any defined meal period")
+        #Set meal based on current local time
+        if breakfast_time[0] <= current_time < breakfast_time[1]:
+            self.meal = 'breakfast'
+        elif lunch_time[0] <= current_time < lunch_time[1]:
+            self.meal = 'lunch'
+        elif dinner_time[0] <= current_time < dinner_time[1]:
+            self.meal = 'dinner'
+        else:
+            raise ValueError("Meal time does not match any defined meal period")
 
         super().save(*args, **kwargs)
 

@@ -29,8 +29,8 @@ class MesscutForm(forms.ModelForm):
 		end_date = self.cleaned_data['end_date']
 
 		if start_date and end_date:
-			if end_date < start_date + timedelta(days=2):
-				raise ValidationError("The end date must be at least 2 days after the start date.")
+			if end_date < start_date + timedelta(days=1):
+				raise ValidationError("The end date must be at least 1 days after the start date.")
 			if end_date > start_date + timedelta(days=8):
 				raise ValidationError("The end date cannot be more than 8 days after the start date.")
 		return end_date
@@ -40,12 +40,12 @@ class MesscutForm(forms.ModelForm):
 		end_date = cleaned_data.get('end_date')
 
 		# Calculate the total days for the current mess cut
-		current_messcut_days = (end_date - start_date).days + 1
 
 		if start_date and end_date:
 			# Ensure both dates are in the same month
 			if start_date.month != end_date.month or start_date.year != end_date.year:
 				raise ValidationError("The start and end dates must be in the same month.")
+			current_messcut_days = (end_date - start_date).days + 1
 
 			# Check for overlapping mess cuts
 			if self.request:
