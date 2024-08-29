@@ -1,4 +1,5 @@
 import csv
+import logging
 import smtplib
 from datetime import datetime
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -23,6 +24,8 @@ from django.conf import settings
 
 from .forms import MesssettingsForm
 
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 @login_required
@@ -299,18 +302,31 @@ def send_mess_bill_mail_admin(request):
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
 
-	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
-		'application__mess_no')
+	mess_bills = MessBill.objects.filter(
+		month__month=messsettings.month_for_bill_calculation.month
+	).order_by('application__mess_no')
+
+	failed_emails = []
+
 	for bill in mess_bills:
-		application = bill.application.last()
-		if application:
-			context = {
-				'subject': f"Monthly Mess Bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')}",
-				'message': f"Hello {application.applicant.first_name} {application.applicant.last_name}! The monthly mess bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')} is now available. Please click the link below to view your bill.",
-				'total_amount': bill.amount,
-				'action_url': 'https://youtube.com'
-			}
-			send_html_email(context['subject'], application.applicant.email, context)
+		try:
+			application = bill.application.last()
+			if application:
+				context = {
+					'subject'     : f"Monthly Mess Bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')}",
+					'message'     : f"Hello {application.applicant.first_name} {application.applicant.last_name}! The monthly mess bill for {messsettings.month_for_bill_calculation.strftime('%B %Y')} is now available. Please click the link below to view your bill.",
+					'total_amount': bill.amount,
+					'action_url'  : 'https://youtube.com'
+				}
+				if not send_html_email(context['subject'], application.applicant.email, context):
+					failed_emails.append(application.applicant.email)
+		except Exception as e:
+			logger.error(f'Error processing bill for application {bill.application.id}: {e}')
+			failed_emails.append(application.applicant.email)
+
+	if failed_emails:
+		return HttpResponse(f'Email sent with some failures. Failed emails: {", ".join(failed_emails)}')
+
 	return HttpResponse('Email sent successfully')
 
 
@@ -337,7 +353,6 @@ def download_mess_bill_admin(request):
 
 	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
 		'application__mess_no')
-
 
 	# Write data rows to the CSV file
 	for bill in mess_bills:
@@ -412,53 +427,31 @@ def calculate_mess_bill():
 
 
 def send_html_email(subject, to_email, context):
-	# Load the template
-	html_template = loader.get_template('email/email_template.html')
+	try:
+		# Load the template
+		html_template = loader.get_template('email/email_template.html')
 
-	# Render the template with context
-	html_content = html_template.render(context)
+		# Render the template with context
+		html_content = html_template.render(context)
 
-	# Strip the HTML content to create a plain text version
-	text_content = strip_tags(html_content)
+		# Strip the HTML content to create a plain text version
+		text_content = strip_tags(html_content)
 
-	# Create the email
-	email = EmailMultiAlternatives(
-		subject=subject,
-		body=text_content,  # Plain text content for email clients that don't support HTML
-		from_email=settings.EMAIL_HOST_USER,
-		to=[to_email]
-	)
+		# Create the email
+		email = EmailMultiAlternatives(
+			subject=subject,
+			body=text_content,  # Plain text content for email clients that don't support HTML
+			from_email=settings.EMAIL_HOST_USER,
+			to=[to_email]
+		)
 
-	# Attach the HTML content as an alternative
-	email.attach_alternative(html_content, "text/html")
+		# Attach the HTML content as an alternative
+		email.attach_alternative(html_content, "text/html")
 
-	# Send the email
-	email.send()
-
-
-
-
+		# Send the email
+		email.send()
+	except Exception as e:
+		logger.error(f'Failed to send email to {to_email}: {e}')
+		return False
+	return True
 # TODO: Implement functionality for exporting bill data to CSV if required
-
-#
-# def send_custom_email(subject, message, recipient_email, action_url):
-# 	s = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
-# 	s.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-#
-# 	# Create the email message container
-# 	msg = MIMEMultipart('alternative')
-# 	msg['Subject'] = subject
-# 	msg['From'] = settings.EMAIL_HOST_USER
-# 	msg['To'] = recipient_email
-#
-# 	template = loader.get_template('email/email_template.html')
-# 	context = {'action_url': action_url}
-# 	html_content = template.render(context)
-#
-# 	part1 = MIMEText(message, 'plain')
-# 	part2 = MIMEText(html_content, 'html')
-# 	msg.attach(part1)
-# 	msg.attach(part2)
-#
-# 	s.sendmail(settings.EMAIL_HOST_USER, recipient_email, msg.as_string())
-# 	s.quit()
