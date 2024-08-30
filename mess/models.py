@@ -83,7 +83,7 @@ class MessBill(models.Model):
 	feast_charges = models.IntegerField(default=0)
 	other_charges = models.IntegerField(default=0)
 	mess_cuts = models.IntegerField(default=0)
-	amount = models.IntegerField()
+	amount = models.IntegerField(default=0)
 	month = models.DateField()
 
 	date_paid = models.DateField(null=True, blank=True)

@@ -34,7 +34,7 @@ def home(request):
 @login_required
 def apply(request):
 	if request.method == 'POST':
-		form = ApplicationForm(request.POST)
+		form = ApplicationForm(request.POST, request.FILES)
 		if form.is_valid():
 			application = form.save(commit=False)
 			application.applicant = request.user
