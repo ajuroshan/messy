@@ -5,6 +5,16 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+    {% if mess_assistant %}
+        <div class="d-flex justify-content-center my-2">
+            <a href="{% url 'scan_qr' %}" class="btn btn-success btn-sm">Scan QR</a>
+        </div>
+    {% endif %}
+    {% if user.is_staff %}
+        <div class="d-flex justify-content-center my-2">
+            <a href="{% url 'view_mess_bill_admin' %}" class="btn btn-secondary btn-sm text-white">Admin</a>
+        </div>
+    {% endif %}
     <div class="bg-light pt-3 pt-md-3">
         <div class="container">
             <div class="row justify-content-md-center">
@@ -93,9 +103,5 @@
             </div>
         </div>
     </div>
-    {% if mess_assistant %}
-        <div class="d-flex justify-content-center my-2">
-            <a href="{% url 'scan_qr' %}" class="btn btn-success btn-sm">Scan QR</a>
-        </div>
-    {% endif %}
+
 {% endblock %}

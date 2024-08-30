@@ -24,8 +24,8 @@ from django.conf import settings
 
 from .forms import MesssettingsForm
 
-
 logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 @login_required
@@ -379,6 +379,49 @@ def download_mess_bill_admin(request):
 			writer.writerow(['N/A'] * 13)  # Handle cases where the application does not exist
 
 	return response
+
+
+@staff_member_required
+def messcut_details_admin(request):
+	today = date.today()
+	if request.method == 'POST':
+		try:
+			today = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+		except ValueError:
+			return HttpResponse('Invalid date format')
+
+	context = {}
+	messcuts = Messcut.objects.filter(start_date__month=today.month)
+	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today)
+
+	# Get all applications that have a mess cut today
+	today_messcut_applications = Application.objects.filter(
+		messcuts__start_date__lte=today,
+		messcuts__end_date__gte=today
+	).distinct()
+
+	# Prepare a list of tuples (application, messcut) for applications with today's mess cut
+	applications_with_messcuts_today = []
+	for application in today_messcut_applications:
+		# Filter the mess cuts for today within this application
+		for messcut in application.messcuts.filter(start_date__lte=today, end_date__gte=today):
+			applications_with_messcuts_today.append((application, messcut))
+
+
+	total_students = Application.objects.filter(accepted=True).count()
+	estimated_food = total_students - today_messcut_applications.count()
+	application_count = today_messcut_applications.count()
+
+	context['messcuts'] = messcuts
+	context['messcuts_today'] = messcuts_today
+	context['total_students'] = total_students
+	context['estimated_food'] = estimated_food
+	context['applications_with_messcuts_today'] = applications_with_messcuts_today
+	context['application_count'] = application_count
+	context['today'] = today
+	print(context)
+
+	return render(request, 'admin/messcut_details.html', context)
 
 
 def calculate_mess_bill():

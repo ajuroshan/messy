@@ -27,8 +27,9 @@ urlpatterns = [
 	path('admin/view_mess_bill_admin/', view_mess_bill_admin, name='view_mess_bill_admin'),
 	path('admin/download_mess_bill_admin/', download_mess_bill_admin, name='download_mess_bill_admin'),
 	path('admin/send_mess_bill_mail_admin/', send_mess_bill_mail_admin, name='send_mess_bill_mail_admin'),
+	path('admin/messcut_details_admin/', send_mess_bill_mail_admin, name='send_mess_bill_mail_admin'),
 
-	path('admin/', admin.site.urls),
+	path('admin/', admin.site.urls,),
 	path('', include('application.urls')),
 	path('mess/', include('mess.urls')),
 	path('accounts/', include('allauth.urls')),

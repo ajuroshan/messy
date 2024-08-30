@@ -1,18 +1,25 @@
-{% extends 'qr_base.html' %}
+{% extends 'custom_admin_base.html' %}
 {% load crispy_forms_tags %}
 
 
 {% block title %}Mess bill for {{ messsettings.month_for_bill_calculation }}{% endblock %}
 
 {% block content %}
-
     <div class="bg-light py-3">
         <div class="container mt-4">
             <h3 class="my-3 text-center text-muted">Mess Bill for {{ messsettings.month_for_bill_calculation }}</h3>
-            <div class="w-100 d-flex flex-row-reverse my-3 gap-2">
-                <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>
+            {% if messsettings.publish_mess_bill %}
+                <p class="text-center text-muted "> Mess Bill is Published</p>
+            {% else %}
+                <input type="hidden" name="publish" value="true">
+                <p class="text-center text-muted "> Mess Bill is Not Published</p>
+            {% endif %}
+            <div class="w-100 d-flex flex-md-row-reverse my-3 gap-3">
+                {#                <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>#}
+                <a href="{% url 'download_mess_bill_admin' %}" target="_blank"
+                   class="btn btn-primary btn-sm text-white">Download</a>
                 <a href="{% url 'send_mess_bill_mail_admin' %}" class="btn btn-primary btn-sm">Send Email</a>
-                <a href="{% url 'download_mess_bill_admin' %}" target="_blank" class="btn btn-primary btn-sm text-white">Download</a>
+                <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>
 
                 <form action="{% url 'view_mess_bill_admin' %}" method="POST">
                     {% csrf_token %}

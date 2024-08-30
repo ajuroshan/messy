@@ -1,11 +1,10 @@
-{% extends 'qr_base.html' %}
+{% extends 'custom_admin_base.html' %}
 {% load crispy_forms_tags %}
 
 
 {% block title %}Mess Bill Admin{% endblock %}
 
 {% block content %}
-
     <div class="bg-light py-3 py-md-5">
         <div class="container">
             <div class="row justify-content-md-center">
@@ -28,7 +27,6 @@
                                     </form>
 
                                 </div>
-                                <a href="{% url 'view_mess_bill_admin' %}" class="btn btn-primary btn-sm mt-3 w-100">View Mess Bill</a>
                             </div>
                         </div>
                     </div>
