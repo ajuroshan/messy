@@ -26,11 +26,38 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-k!$ajk$toex^c4)8(-v1h%yj4%rr#&6_s(#($gpeyx5+)mq*)b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
 
-SITE_ID = 4
+
+
+ALLOWED_HOSTS = ['13.235.238.101','messy.cusat.live','localhost','127.0.0.1']
+
+CORS_ALLOWED_ORIGINS = [
+    'http://13.235.238.101',  # Add the origin here
+    'http://messy.cusat.live',
+    'https://messy.cusat.live'
+    # Add other trusted origins as needed
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://13.235.238.101',  # Add the origin here
+    'http://messy.cusat.live',
+    'https://messy.cusat.live'
+    # Add other trusted origins as needed
+]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://13.235.238.101',  # Add the origin here
+    'http://messy.cusat.live',
+    'https://messy.cusat.live'
+    # Add other trusted origins as needed
+]
+
+CORS_ORIGIN_ALLOW_ALL = False
+
+
+SITE_ID = 5
 
 # Application definition
 
@@ -150,12 +177,13 @@ USE_I18N = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-	BASE_DIR / "static",
-]
+#STATICFILES_DIRS = [
+#	BASE_DIR / "static",
+#]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
