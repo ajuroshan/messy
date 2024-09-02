@@ -30,6 +30,8 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @login_required
 def apply_for_messcut(request):
+	messcut_closing_time = Messsettings.objects.first().messcut_closing_time
+	can_mark_messcut = timezone.localtime().time() < messcut_closing_time
 	application = Application.objects.filter(applicant=request.user).first()
 	messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
 	total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
@@ -44,6 +46,8 @@ def apply_for_messcut(request):
 				messcut.save()  # Save the Messcut instance first
 				applicant.messcuts.add(messcut)  # Add the Messcut to the applicant's messcuts
 				applicant.save()  # Save the Application instance to update the M2M relationship
+				messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
+				total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
 
 				return render(request, 'mess/apply.html',
 				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
@@ -55,7 +59,7 @@ def apply_for_messcut(request):
 		form = MesscutForm()
 
 	return render(request, 'mess/apply.html',
-	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts})
+	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
 
 
 def group_required(group_name):

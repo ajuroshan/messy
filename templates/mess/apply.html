@@ -10,14 +10,15 @@
             <div class="row justify-content-md-center">
                 <div class="col-12 col-md-11 col-lg-8 col-xl-7 col-xxl-6">
                     <div class="bg-white p-4 p-md-5 rounded shadow-sm">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-5">
-                                    <h3>Apply for MessCut</h3>
+                        {% if can_mark_messcut %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-5">
+                                        <h3>Apply for MessCut</h3>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
+                            <div class="row">
                             <div class="col-12">
                                 <div class="">
                                     <form method="post">
@@ -55,10 +56,18 @@
 
                                 </div>
                             </div>
+                        {% else %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <div >
+                                        <h5 class="text-center text-muted">You cannot mark messcut after {{ messcut_closing_time|date:"h:i A"}}</h5>
+                                    </div>
+                                </div>
+                            </div>                        {% endif %}
                         </div>
-                    {% if message %}
-                        <div class="alert alert-success my-4" id="finalMessage">{{ message }}</div>
-                    {% endif %}
+                        {% if message %}
+                            <div class="alert alert-success my-4" id="finalMessage">{{ message }}</div>
+                        {% endif %}
 
                     </div>
                 </div>
