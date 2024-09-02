@@ -57,7 +57,7 @@
                             {% for attendance in lunch_attendance %}
                                 <tr>
                                     <td>{{ attendance.student.mess_no }}</td>
-                                    <td class="text-center">{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                    <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -73,14 +73,14 @@
                             <thead>
                             <tr>
                                 <th>Mess No</th>
-                                <th class="text-center">Dinner</th>
+                                <th>Dinner</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for attendance in dinner_attendance %}
                                 <tr>
                                     <td>{{ attendance.student.mess_no }}</td>
-                                    <td class="text-center">{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                    <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
