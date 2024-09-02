@@ -29,7 +29,7 @@ from django.conf import settings
 
 # Create your views here.
 
-
+@staff_member_required
 def attendance_details_admin(request):
 	today = date.today()
 	if request.method == 'POST':
@@ -99,7 +99,7 @@ def view_mess_bill_admin(request):
 	return render(request, 'admin/mess_bills_table.html',
 	              {'mess_bills': mess_bills, 'messsettings': messsettings})
 
-
+@staff_member_required
 def download_mess_bill_admin(request):
 	try:
 		# Assume there is only one Messsettings instance
@@ -192,7 +192,7 @@ def messcut_details_admin(request):
 
 	return render(request, 'admin/messcut_details.html', context)
 
-
+@staff_member_required
 def attendance_cut_details_admin(request):
 	today = date.today()
 
@@ -211,52 +211,40 @@ def attendance_cut_details_admin(request):
 		timestamp__month=today.month,
 		timestamp__day=today.day
 	)
-	attendance_today_applications = attendance_today.values_list('student', flat=True)
+
+	# Extract student IDs who attended each meal
+	breakfast_attended_students = attendance_today.filter(meal='breakfast').values_list('student', flat=True)
+	lunch_attended_students = attendance_today.filter(meal='lunch').values_list('student', flat=True)
+	dinner_attended_students = attendance_today.filter(meal='dinner').values_list('student', flat=True)
 
 	# Get all mess cuts valid today
 	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today)
 
-	# Exclude applications where the student has marked attendance today
-	applications_without_attendance = applications.exclude(
-		applicant__in=attendance_today_applications
-	)
-
-	# Exclude applications with a mess cut today
-	applications_without_attendance = applications_without_attendance.exclude(
-		messcuts__in=messcuts_today
+	# Get all applications with mess cuts valid today
+	applications_with_messcut = Application.objects.filter(
+		messcuts__start_date__lte=today,
+		messcuts__end_date__gte=today
 	).distinct()
 
-	# Get attendance for each meal type
-	breakfast_attendance = attendance_today.filter(meal='breakfast')
-	lunch_attendance = attendance_today.filter(meal='lunch')
-	dinner_attendance = attendance_today.filter(meal='dinner')
-
-	# Extract student IDs who attended each meal
-	breakfast_attended_students = breakfast_attendance.values_list('student', flat=True)
-	lunch_attended_students = lunch_attendance.values_list('student', flat=True)
-	dinner_attended_students = dinner_attendance.values_list('student', flat=True)
-
-	# Get IDs of students who should have attended (accepted applications)
-	all_application_students = applications.values_list('applicant', flat=True)
+	# Exclude applications with a mess cut today
+	valid_applications = applications.exclude(
+		applicant__in=applications_with_messcut.values_list('applicant', flat=True)
+	)
 
 	# Calculate who didn't attend each meal
-	breakfast_not_attended = set(all_application_students) - set(breakfast_attended_students)
-	lunch_not_attended = set(all_application_students) - set(lunch_attended_students)
-	dinner_not_attended = set(all_application_students) - set(dinner_attended_students)
-
-	# Query student details for those who didn't attend
-	breakfast_not_attended_details = Application.objects.filter(applicant__in=breakfast_not_attended)
-	lunch_not_attended_details = Application.objects.filter(applicant__in=lunch_not_attended)
-	dinner_not_attended_details = Application.objects.filter(applicant__in=dinner_not_attended)
-
-	print(breakfast_not_attended_details)
-	print(lunch_not_attended_details)
-	print(dinner_not_attended_details)
+	breakfast_not_attended_details = valid_applications.exclude(
+		applicant__in=breakfast_attended_students
+	)
+	lunch_not_attended_details = valid_applications.exclude(
+		applicant__in=lunch_attended_students
+	)
+	dinner_not_attended_details = valid_applications.exclude(
+		applicant__in=dinner_attended_students
+	)
 
 	# Render the results to a template
 	context = {
 		'today'                          : today,
-		'applications_without_attendance': applications_without_attendance,
 		'breakfast_not_attended'         : breakfast_not_attended_details,
 		'lunch_not_attended'             : lunch_not_attended_details,
 		'dinner_not_attended'            : dinner_not_attended_details,
