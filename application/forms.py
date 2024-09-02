@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 class ApplicationForm(forms.ModelForm):
 	class Meta:
 		model = Application
-		fields = ['first_name', 'last_name', 'hostel', 'department', 'semester', 'outmess', 'food_preference', 'claim', 'profile_pic']
+		fields = ['first_name', 'last_name', 'hostel', 'department', 'semester', 'outmess', 'food_preference','profile_pic']
 		widgets = {
 			'profile_pic': forms.ClearableFileInput(attrs={'class': 'form-control', 'required': 'required'}),
 		}

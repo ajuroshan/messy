@@ -92,7 +92,7 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 	list_filter = ['applicant', 'hostel', 'mess_no', 'accepted', 'created_at']
 	search_fields = ['applicant__first_name', 'applicant__last_name','mess_no', 'created_at']
 	actions = ['accept_application', 'cancel_application', 'make_official_outmess', 'make_mess_assistant',
-	           'dismiss_mess_assistant']
+	           'dismiss_mess_assistant','make_claim','cancel_claim','make_outmess','cancel_outmess']
 
 	def get_applicant_name(self, obj):
 		return f"{obj.applicant.first_name} {obj.applicant.last_name}"
@@ -174,6 +174,45 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 		return HttpResponseRedirect(request.get_full_path())
 
 	dismiss_mess_assistant.short_description = "Dismiss selected mess assistants"
+
+
+
+	def make_claim(self, request, queryset):
+		"""
+		Mark selected applications as verified.
+		"""
+		updated_count = queryset.update(claim=True)
+		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
+
+	make_claim.short_description = "Mark selected applications have claim"
+
+	def cancel_claim(self, request, queryset):
+		"""
+		Mark selected applications as verified.
+		"""
+		updated_count = queryset.update(claim=False)
+		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
+
+	cancel_claim.short_description = "Cancel claim of selected applications"
+
+
+	def make_outmess(self, request, queryset):
+		"""
+		Mark selected applications as verified.
+		"""
+		updated_count = queryset.update(outmess=True)
+		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
+
+	make_claim.short_description = "Mark selected applications as Outmess"
+
+	def cancel_outmess(self, request, queryset):
+		"""
+		Mark selected applications as verified.
+		"""
+		updated_count = queryset.update(outmess=False)
+		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
+
+	cancel_claim.short_description = "Dismiss selected applications as Outmess"
 
 	def get_queryset(self, request):
 		return Application.objects.filter(accepted=True).order_by("-created_at")
