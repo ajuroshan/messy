@@ -1,0 +1,114 @@
+{% extends 'custom_admin_base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Attendance cut for{{ today }}{% endblock %}
+{% block content %}
+    <div class="bg-light py-3">
+        <div class="container mt-4">
+            <h3 class="my-3 text-center text-muted">Attendance for {{ today|date:"F j, Y" }}</h3>
+
+            <div class="d-flex justify-content-center my-4">
+                <form action="{% url 'attendance_cut_details_admin' %}" method="POST"
+                      class="d-flex align-items-center gap-2">
+                    {% csrf_token %}
+                    <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                    <button type="submit" class="btn btn-success btn-sm">Submit</button>
+                </form>
+            </div>
+
+            <div class="my-5">
+                <div class="row">
+                    <!-- Breakfast -->
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded border mb-3">
+
+                            <strong>Total Breakfast Not Attended:</strong> {{ breakfast_not_attended.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="3" class="text-center">Breakfast Not Attended</th>
+
+                            </tr>
+                            <tr>
+                                <th>Mess No</th>
+                                <th>Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in breakfast_not_attended %}
+                                <tr>
+                                    <td>{{ attendance.mess_no }}</td>
+                                    <td>{{ attendance.applicant.first_name|title }} {{ attendance.applicant.last_name|title }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lunch -->
+                    <div class="col-md-4">
+
+                        <div class="bg-light p-3 rounded border mb-3">
+
+                            <strong>Total Lunch Not Attended:</strong> {{ lunch_not_attended.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="3" class="text-center">Lunch Not Attended</th>
+
+                            </tr>
+                            <tr>
+                                <th>Mess No</th>
+                                <th>Name</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in lunch_not_attended %}
+                                <tr>
+                                    <td>{{ attendance.mess_no }}</td>
+                                    <td>{{ attendance.applicant.first_name|title }} {{ attendance.applicant.last_name|title }}</td>
+
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Dinner -->
+                    <div class="col-md-4">
+
+                        <div class="bg-light p-3 rounded border mb-3">
+                            <strong>Total Dinner Not Attended:</strong> {{ lunch_not_attended.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="3" class="text-center">Dinner Not Attended</th>
+
+                            </tr>
+                            <tr>
+                                <th>Mess No</th>
+                                <th>Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in dinner_not_attended %}
+                                <tr>
+                                    <td>{{ attendance.mess_no }}</td>
+                                    <td>{{ attendance.applicant.first_name|title }} {{ attendance.applicant.last_name|title }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+{% endblock %}

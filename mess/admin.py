@@ -3,7 +3,6 @@ from .models import *
 from django.contrib import admin
 from django.urls import path
 from django.http import HttpResponseRedirect
-from .views import mess_bill_admin
 from django.utils.html import format_html
 
 
@@ -36,21 +35,7 @@ class MessBillAdmin(admin.ModelAdmin):
 	list_filter = ['amount', 'month', 'paid']
 	search_fields = ['amount', 'month', 'paid']
 
-	# Override the changelist view to add a custom link
-	def changelist_view(self, request, extra_context=None):
-		extra_context = extra_context or {}
-		extra_context['custom_link'] = format_html(
-			'<a class="button" href="{}">Custom Mess Bill Page</a>', '/admin/mess-bill-admin/'
-		)
-		return super().changelist_view(request, extra_context=extra_context)
 
-	# You can add custom URLs for your custom views
-	def get_urls(self):
-		urls = super().get_urls()
-		custom_urls = [
-			path('mess-bill-admin/', self.admin_site.admin_view(mess_bill_admin), name='mess_bill_admin'),
-		]
-		return custom_urls + urls
 
 
 @admin.register(Messsettings)
