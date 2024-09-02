@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date, timedelta
-from .models import Messcut, MessBill
+from .models import Messcut, MessBill, Feedback
 from application.models import Application
 
 
@@ -104,4 +104,13 @@ class PayMessBillForm(forms.ModelForm):
 		widgets = {
 			'screenshot' : forms.ClearableFileInput(attrs={'class': 'form-control'}),
 			'amount_paid': forms.NumberInput(attrs={'class': 'form-control'}),
+		}
+
+
+class FeedbackForm(forms.ModelForm):
+	class Meta:
+		model = Feedback
+		fields = ['feedback']
+		widgets = {
+			'feedback': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
 		}

@@ -465,6 +465,20 @@ def attendance_details(request):
 
 
 
+def feedback(request):
+	if request.method == 'POST':
+		form = FeedbackForm(request.POST)
+		if form.is_valid():
+			feedback_form = form.save(commit=False)
+			application = Application.objects.filter(applicant=request.user).first()
+			feedback_form.student = application
+			feedback_form.save()
+			return redirect('home')
+	else:
+		form = FeedbackForm()
+
+	return render(request, 'mess/feedback.html', {'form': form})
+
 def calculate_mess_bill():
 	# Fetch Messsettings only once
 	messsettings = Messsettings.objects.first()

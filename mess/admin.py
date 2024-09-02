@@ -59,3 +59,9 @@ class MesssettingsAdmin(admin.ModelAdmin):
 	list_filter = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
 	search_fields = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
 	list_per_page = 10
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+	list_display = ['student', 'date']
+	list_filter = ['student', 'date']
+	search_fields = ['student', 'date']

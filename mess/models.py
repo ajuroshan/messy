@@ -96,6 +96,14 @@ class MessBill(models.Model):
 		return f"{self.amount}"
 
 
+class Feedback(models.Model):
+	student = models.ForeignKey('application.Application', on_delete=models.CASCADE)
+	feedback = models.TextField()
+	date = models.DateField(auto_now_add=True)
+
+	def __str__(self):
+		return f"{self.student.first_name} - {self.date}"
+
 class Messsettings(models.Model):
 	total_days = models.IntegerField(default=30)
 	amount_per_day = models.IntegerField(default=10)
