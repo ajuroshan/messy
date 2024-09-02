@@ -203,7 +203,7 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 		updated_count = queryset.update(outmess=True)
 		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
 
-	make_claim.short_description = "Mark selected applications as Outmess"
+	make_outmess.short_description = "Mark selected applications as Outmess"
 
 	def cancel_outmess(self, request, queryset):
 		"""
@@ -212,7 +212,7 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 		updated_count = queryset.update(outmess=False)
 		self.message_user(request, f"{updated_count} applications were successfully marked as verified.")
 
-	cancel_claim.short_description = "Dismiss selected applications as Outmess"
+	cancel_outmess.short_description = "Dismiss selected applications as Outmess"
 
 	def get_queryset(self, request):
 		return Application.objects.filter(accepted=True).order_by("-created_at")
