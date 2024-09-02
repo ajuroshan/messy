@@ -450,6 +450,7 @@ def attendance_details_admin(request):
 
 
 def attendance_details(request):
+	current_datetime = datetime.now()
 	context = {}
 	total_attendance = MessAttendance.objects.filter(student=Application.objects.filter(applicant=request.user).first(),timestamp__month=date.today().month,timestamp__year=date.today().year)
 	breakfast_attendance = total_attendance.filter(meal='breakfast')
@@ -459,6 +460,7 @@ def attendance_details(request):
 	context['breakfast_attendance'] = breakfast_attendance
 	context['lunch_attendance'] = lunch_attendance
 	context['dinner_attendance'] = dinner_attendance
+	context['current_datetime'] = current_datetime
 	return render(request, 'mess/attendance_details.html',context)
 
 

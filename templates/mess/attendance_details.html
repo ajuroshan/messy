@@ -6,7 +6,7 @@
 {% block content %}
     <div class="bg-light py-3">
         <div class="container mt-4">
-            <h5 class="my-3 text-center text-muted">Attendance for {{ breakfast_attendance.first.timestamp|date:"F Y" }}</h5>
+            <h5 class="my-3 text-center text-muted">Attendance for {{ current_datetime|date:"F Y" }}</h5>
 
             <div class="my-5">
                 <div class="row">
