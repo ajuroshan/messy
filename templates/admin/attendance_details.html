@@ -9,7 +9,8 @@
             <h3 class="my-3 text-center text-muted">Attendance for {{ today|date:"F j, Y" }}</h3>
 
             <div class="d-flex justify-content-center my-4">
-                <form action="{% url 'attendance_details_admin' %}" method="POST" class="d-flex align-items-center gap-2">
+                <form action="{% url 'attendance_details_admin' %}" method="POST"
+                      class="d-flex align-items-center gap-2">
                     {% csrf_token %}
                     <input type="date" name="date" class="form-control" value="{{ today }}">
                     <button type="submit" class="btn btn-success btn-sm">Submit</button>
@@ -28,6 +29,8 @@
                             <tr>
                                 <th>Mess No</th>
                                 <th>Breakfast</th>
+                                <th>Entry Time</th>
+
                             </tr>
                             </thead>
                             <tbody>
@@ -35,6 +38,7 @@
                                 <tr>
                                     <td>{{ attendance.student.mess_no }}</td>
                                     <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                    <td>{{ attendance.timestamp|date:"h:i A" }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -51,6 +55,8 @@
                             <tr>
                                 <th>Mess No</th>
                                 <th>Lunch</th>
+                                <th>Entry Time</th>
+
                             </tr>
                             </thead>
                             <tbody>
@@ -58,6 +64,8 @@
                                 <tr>
                                     <td>{{ attendance.student.mess_no }}</td>
                                     <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                    <td>{{ attendance.timestamp|date:"h:i A" }}</td>
+
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -74,6 +82,7 @@
                             <tr>
                                 <th>Mess No</th>
                                 <th>Dinner</th>
+                                <th>Entry Time</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -81,6 +90,7 @@
                                 <tr>
                                     <td>{{ attendance.student.mess_no }}</td>
                                     <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                    <td>{{ attendance.timestamp|date:"h:i A" }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
