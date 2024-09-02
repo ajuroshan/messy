@@ -6,7 +6,8 @@ from .forms import ApplicationForm
 from .models import Application
 import datetime
 from mess.models import Messmenu
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 
 # Create your views here.
 @login_required
@@ -31,6 +32,7 @@ def home(request):
 	}
 	return render(request, 'application/home.html', context)
 
+@user_passes_test(lambda u: not Application.objects.filter(applicant=u).exists(), login_url='home')
 @login_required
 def apply(request):
 	if request.method == 'POST':
