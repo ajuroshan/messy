@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Total Attendance{% endblock %}
+{% block content %}
+    <div class="bg-light py-3">
+        <div class="container mt-4">
+            <h5 class="my-3 text-center text-muted">Attendance for {{ breakfast_attendance.first.timestamp|date:"F Y" }}</h5>
+
+            <div class="my-5">
+                <div class="row">
+                    <!-- Breakfast -->
+                    <div class="col-md-4">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Total Breakfast Attendance: {{ breakfast_attendance.count }}</th>
+
+                            </tr>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Entry Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in breakfast_attendance %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ attendance.timestamp|date:"l jS F h:i A" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lunch -->
+                    <div class="col-md-4">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Total Lunch Attendance: {{ lunch_attendance.count }}</th>
+
+                            </tr>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Entry Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in lunch_attendance %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ attendance.timestamp|date:"l jS F h:i A" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Dinner -->
+                    <div class="col-md-4">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Total Dinner Attendance: {{ dinner_attendance.count }}</th>
+
+                            </tr>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Entry Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in dinner_attendance %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ attendance.timestamp|date:"l jS F h:i A" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

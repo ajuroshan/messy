@@ -10,4 +10,5 @@ urlpatterns = [
     path('weekly_menu/',weekly_menu,name='weekly_menu'),
     path('scan_qr/',scan_qr,name='scan_qr'),
     path('mark_attendance/',mark_attendance,name='mark_attendance'),
+    path('attendance_details/',attendance_details,name='attendance_details'),
     ]

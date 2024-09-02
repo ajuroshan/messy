@@ -49,7 +49,11 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/mess/dashboard/' %}active{% endif %}"
-                   href="{% url 'dashboard' %}" tabindex="-1" aria-disabled="true">Details</a>
+                   href="{% url 'dashboard' %}">Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/mess/attendance_details/' %}active{% endif %}"
+                   href="{% url 'attendance_details' %}">Attendance</a>
             </li>
         </ul>
     {% endif %}

@@ -448,6 +448,21 @@ def attendance_details_admin(request):
 	return render(request, 'admin/attendance_details.html',context)
 
 
+
+def attendance_details(request):
+	context = {}
+	total_attendance = MessAttendance.objects.filter(student=Application.objects.filter(applicant=request.user).first(),timestamp__month=date.today().month,timestamp__year=date.today().year)
+	breakfast_attendance = total_attendance.filter(meal='breakfast')
+	lunch_attendance = total_attendance.filter(meal='lunch')
+	dinner_attendance = total_attendance.filter(meal='dinner')
+
+	context['breakfast_attendance'] = breakfast_attendance
+	context['lunch_attendance'] = lunch_attendance
+	context['dinner_attendance'] = dinner_attendance
+	return render(request, 'mess/attendance_details.html',context)
+
+
+
 def calculate_mess_bill():
 	# Fetch Messsettings only once
 	messsettings = Messsettings.objects.first()
