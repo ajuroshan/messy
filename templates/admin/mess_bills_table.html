@@ -18,7 +18,7 @@
                 {#                <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>#}
                 <a href="{% url 'download_mess_bill_admin' %}" target="_blank"
                    class="btn btn-primary btn-sm text-white">Download</a>
-                <a href="{% url 'send_mess_bill_mail_admin' %}" class="btn btn-primary btn-sm">Send Email</a>
+{#                <a href="{% url 'send_mess_bill_mail_admin' %}" class="btn btn-primary btn-sm">Send Email</a>#}
                 <a href="{% url 'mess_bill_admin' %}" class="btn btn-primary btn-sm">Recalculate</a>
 
                 <form action="{% url 'view_mess_bill_admin' %}" method="POST">
@@ -79,7 +79,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="12" class="text-center">No mess bills found.</td>
+                        <td colspan="15" class="text-center">No mess bills found.</td>
                     </tr>
                 {% endfor %}
                 </tbody>

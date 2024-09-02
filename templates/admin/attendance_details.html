@@ -1,0 +1,93 @@
+{% extends 'custom_admin_base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Messcuts for{{ today }}{% endblock %}
+{% block content %}
+    <div class="bg-light py-3">
+        <div class="container mt-4">
+            <h3 class="my-3 text-center text-muted">Attendance for {{ today|date:"F j, Y" }}</h3>
+
+            <div class="d-flex justify-content-center my-4">
+                <form action="{% url 'attendance_details_admin' %}" method="POST" class="d-flex align-items-center gap-2">
+                    {% csrf_token %}
+                    <input type="date" name="date" class="form-control" value="{{ today }}">
+                    <button type="submit" class="btn btn-success btn-sm">Submit</button>
+                </form>
+            </div>
+
+            <div class="my-5">
+                <div class="row">
+                    <!-- Breakfast -->
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded border mb-3">
+                            <strong>Total Breakfast Attendance:</strong> {{ breakfast_attendance.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Mess No</th>
+                                <th>Breakfast</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in breakfast_attendance %}
+                                <tr>
+                                    <td>{{ attendance.student.mess_no }}</td>
+                                    <td>{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lunch -->
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded border mb-3">
+                            <strong>Total Lunch Attendance:</strong> {{ lunch_attendance.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Mess No</th>
+                                <th>Lunch</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in lunch_attendance %}
+                                <tr>
+                                    <td>{{ attendance.student.mess_no }}</td>
+                                    <td class="text-center">{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Dinner -->
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded border mb-3">
+                            <strong>Total Dinner Attendance:</strong> {{ dinner_attendance.count }}
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Mess No</th>
+                                <th class="text-center">Dinner</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for attendance in dinner_attendance %}
+                                <tr>
+                                    <td>{{ attendance.student.mess_no }}</td>
+                                    <td class="text-center">{{ attendance.student.first_name|title }} {{ attendance.student.last_name|title }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

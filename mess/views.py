@@ -424,6 +424,26 @@ def messcut_details_admin(request):
 	return render(request, 'admin/messcut_details.html', context)
 
 
+def attendance_details_admin(request):
+	today = date.today()
+	if request.method == 'POST':
+		try:
+			today = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+		except ValueError:
+			return HttpResponse('Invalid date format')
+	context = {}
+	attendance_today = MessAttendance.objects.filter(timestamp__day=today.day, timestamp__month=today.month, timestamp__year=today.year)
+	breakfast_attendance = attendance_today.filter(meal='breakfast')
+	lunch_attendance = attendance_today.filter(meal='lunch')
+	dinner_attendance = attendance_today.filter(meal='dinner')
+
+	context['today'] = today
+	context['breakfast_attendance'] = breakfast_attendance
+	context['lunch_attendance'] = lunch_attendance
+	context['dinner_attendance'] = dinner_attendance
+	return render(request, 'admin/attendance_details.html',context)
+
+
 def calculate_mess_bill():
 	# Fetch Messsettings only once
 	messsettings = Messsettings.objects.first()

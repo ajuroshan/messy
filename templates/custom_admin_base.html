@@ -30,9 +30,15 @@
             <li class="nav-item">
                 <a class="nav-link {% if request.path == '/admin/view_mess_bill_admin/' %}active{% endif %}"
                    href="{% url 'view_mess_bill_admin' %}">View Mess Bill</a>
-            </li>            <li class="nav-item">
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {% if request.path == '/admin/messcut_details_admin/' %}active{% endif %}"
                    href="{% url 'messcut_details_admin' %}">Messcut Details</a>
+            </li>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin/attendance_details_admin/' %}active{% endif %}"
+                   href="{% url 'attendance_details_admin' %}">Attendance Details</a>
             </li>
         </ul>
     {% endif %}
