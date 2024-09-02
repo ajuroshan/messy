@@ -51,7 +51,7 @@ def apply_for_messcut(request):
 
 				return render(request, 'mess/apply.html',
 				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
-				               'message': 'Messcut applied successfully'})
+				               'message': 'Messcut applied successfully', 'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
 			else:
 				# Handle the case where no accepted application exists
 				return HttpResponse("You need to apply for a mess first")
