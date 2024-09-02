@@ -8,9 +8,9 @@ from .models import *
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted', 'created_at']
+	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess', 'created_at']
 	list_filter = ['applicant__first_name', 'applicant__last_name', 'hostel', 'mess_no', 'accepted', 'created_at']
-	search_fields = ['applicant__first_name', 'applicant__last_name', 'hostel', 'accepted', 'created_at']
+	search_fields = ['applicant__first_name', 'applicant__last_name','mess_no', 'created_at']
 	actions = ['accept_application', 'cancel_application', 'make_official_outmess', 'make_mess_assistant',
 	           'dismiss_mess_assistant']
 
@@ -88,9 +88,9 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 @admin.register(AcceptedApplication)
 class AcceptedApplicationAdmin(admin.ModelAdmin):
-	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted', 'created_at']
+	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess', 'created_at']
 	list_filter = ['applicant', 'hostel', 'mess_no', 'accepted', 'created_at']
-	search_fields = ['applicant', 'hostel', 'accepted', 'created_at']
+	search_fields = ['applicant__first_name', 'applicant__last_name','mess_no', 'created_at']
 	actions = ['accept_application', 'cancel_application', 'make_official_outmess', 'make_mess_assistant',
 	           'dismiss_mess_assistant']
 
