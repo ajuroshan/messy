@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import Group
+from django.utils.safestring import mark_safe
 
 # Register your models here.
 from .models import *
@@ -8,11 +9,19 @@ from .models import *
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess','official_outmess', 'created_at']
+	list_display = ['profile','get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess','official_outmess', 'created_at']
 	list_filter = ['applicant__first_name', 'applicant__last_name', 'hostel', 'mess_no', 'accepted', 'created_at']
 	search_fields = ['applicant__first_name', 'applicant__last_name','mess_no', 'created_at']
 	actions = ['accept_application', 'cancel_application', 'make_official_outmess', 'make_mess_assistant',
 	           'dismiss_mess_assistant']
+
+	def profile(self, obj):
+		return mark_safe('<img src="{url}" width="{width}" height={height} />'.format(
+			url=obj.profile_pic.url,
+			width=70,
+			height=70,
+		)
+		)
 
 	def get_applicant_name(self, obj):
 		return f"{obj.applicant.first_name} {obj.applicant.last_name}"
@@ -84,6 +93,8 @@ class ApplicationAdmin(admin.ModelAdmin):
 		return HttpResponseRedirect(request.get_full_path())
 
 	dismiss_mess_assistant.short_description = "Dismiss selected mess assistants"
+
+
 
 
 @admin.register(AcceptedApplication)
