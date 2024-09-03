@@ -99,11 +99,19 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 @admin.register(AcceptedApplication)
 class AcceptedApplicationAdmin(admin.ModelAdmin):
-	list_display = ['get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess','official_outmess', 'created_at']
+	list_display = ['profile','get_applicant_name', 'department', 'semester', 'mess_no', 'accepted','claim','outmess','official_outmess', 'created_at']
 	list_filter = ['applicant', 'hostel', 'mess_no', 'accepted', 'created_at']
 	search_fields = ['applicant__first_name', 'applicant__last_name','mess_no', 'created_at']
 	actions = ['accept_application', 'cancel_application', 'make_official_outmess', 'make_mess_assistant',
 	           'dismiss_mess_assistant','make_claim','cancel_claim','make_outmess','cancel_outmess']
+
+	def profile(self, obj):
+		return mark_safe('<img src="{url}" width="{width}" height={height} />'.format(
+			url=obj.profile_pic.url,
+			width=70,
+			height=70,
+		)
+		)
 
 	def get_applicant_name(self, obj):
 		return f"{obj.applicant.first_name} {obj.applicant.last_name}"
