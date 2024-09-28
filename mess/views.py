@@ -1,7 +1,6 @@
 import csv
 import logging
 import smtplib
-from datetime import datetime
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import loader
 from django.utils.html import strip_tags
@@ -21,7 +20,7 @@ from django.core.mail import EmailMessage
 from django.utils.html import strip_tags
 from django.template import loader
 from django.conf import settings
-
+from datetime import datetime
 from .forms import MesssettingsForm
 
 logger = logging.getLogger(__name__)
