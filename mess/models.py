@@ -1,3 +1,5 @@
+import datetime
+
 from django.utils import timezone
 from datetime import time
 
@@ -135,6 +137,12 @@ class Messsettings(models.Model):
 	dinner_end_time = models.TimeField()
 
 	messcut_closing_time = models.TimeField()
+
+	mess_closed_from = models.DateField()
+	mess_closed_to = models.DateField()
+
+	bill_calculation_date = models.DateField(default=datetime.date.today())
+
 
 
 	def __str__(self):

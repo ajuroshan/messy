@@ -11,6 +11,10 @@
 
     {% else %}
         <div class="container">
+            <audio controls>
+                <source src="{% static 'audio/click.wav' %}" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
             <h6 class="text-center my-4 text-muted">Scan QR Code to Mark Attendance</h6>
             <div class="d-flex justify-content-center mb-4">
                 <div id="qr-reader" style="width:100%"></div>

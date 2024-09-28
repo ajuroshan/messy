@@ -265,6 +265,9 @@ def calculate_mess_bill():
 	TOTAL_DAYS = messsettings.total_days
 	OTHER_CHARGES = messsettings.other_charges
 	FEAST_CHARGES = messsettings.feast_charges
+	MESS_CLOSED_FROM = messsettings.mess_closed_from
+	MESS_CLOSED_TO = messsettings.mess_closed_to
+	BILL_CALCULATION_DATE = messsettings.bill_calculation_date
 
 	mess_bills = MessBill.objects.filter(month__month=MONTH)
 	if mess_bills.exists():
@@ -275,9 +278,11 @@ def calculate_mess_bill():
 		# Calculate total messcut days for the given month
 		messcuts = application.messcuts.filter(start_date__month=MONTH)
 		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+		first_meal_date = application.attendance.filter(date__month=MONTH).order_by('date').first()
+		effective_days = sum((BILL_CALCULATION_DATE - first_meal_date).days + 1)
 
 		# Calculate effective days and total amount
-		effective_days = TOTAL_DAYS - total_messcut_days
+		effective_days = effective_days - total_messcut_days
 		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
 
 		# Create the mess bill
