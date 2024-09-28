@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-k!$ajk$toex^c4)8(-v1h%yj4%rr#&6_s(#($gpeyx5+)mq*)b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 
@@ -62,7 +62,8 @@ SITE_ID = 5
 # Application definition
 
 INSTALLED_APPS = [
-	'django.contrib.admin',
+	'jazzmin',
+        'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
@@ -70,10 +71,10 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 
 	'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+        'allauth',
+        'allauth.account',
+        'allauth.socialaccount',
+        'allauth.socialaccount.providers.google',
 	'crispy_forms',
 	'crispy_bootstrap5',
 
@@ -129,6 +130,8 @@ TEMPLATES = [
 				'django.contrib.messages.context_processors.messages',
 				'application.context_processors.global_variables',
 			],
+			"builtins"          : ["templatetags.customtags"],
+
 		},
 	},
 ]
