@@ -259,27 +259,29 @@ def calculate_mess_bill():
 		raise ValueError("Messsettings instance is required to calculate mess bills.")
 
 	# Constants
-	MONTH = messsettings.month_for_bill_calculation.month
+	BILL_DATE = messsettings.month_for_bill_calculation
 	AMOUNT_PER_DAY = messsettings.amount_per_day
 	ESTABLISHMENT_CHARGES = messsettings.establishment_charges
 	TOTAL_DAYS = messsettings.total_days
 	OTHER_CHARGES = messsettings.other_charges
 	FEAST_CHARGES = messsettings.feast_charges
-	MESS_CLOSED_FROM = messsettings.mess_closed_from
-	MESS_CLOSED_TO = messsettings.mess_closed_to
-	BILL_CALCULATION_DATE = messsettings.bill_calculation_date
 
-	mess_bills = MessBill.objects.filter(month__month=MONTH)
+
+	mess_bills = MessBill.objects.filter(month__month=BILL_DATE.month)
 	if mess_bills.exists():
 		mess_bills.delete()
 
 	# Iterate through accepted applications
 	for application in Application.objects.filter(accepted=True):
 		# Calculate total messcut days for the given month
-		messcuts = application.messcuts.filter(start_date__month=MONTH)
+		messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
 		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
-		first_meal_date = application.attendance.filter(date__month=MONTH).order_by('date').first()
-		effective_days = sum((BILL_CALCULATION_DATE - first_meal_date).days + 1)
+		first_attendance = MessAttendance.objects.filter(student=application,timestamp__month=BILL_DATE.month,timestamp__year=BILL_DATE.year).order_by('timestamp').first()
+
+		if first_attendance:
+			effective_days = (BILL_DATE - first_attendance.date).days + 1
+		else:
+			effective_days = TOTAL_DAYS
 
 		# Calculate effective days and total amount
 		effective_days = effective_days - total_messcut_days
@@ -298,7 +300,6 @@ def calculate_mess_bill():
 			total_days=TOTAL_DAYS,
 			mess_cuts=total_messcut_days
 		)
-		# Save the application if needed (if changes made to application itself)
 		application.save()
 
 

@@ -90,12 +90,14 @@ class MesssettingsForm(forms.ModelForm):
 			'month_for_bill_calculation',
 			'last_date_for_payment',
 			'per_day_fine_after_due_date',
-			'bill_calculation_date',
 		]
 		widgets = {
 			'month_for_bill_calculation': forms.DateInput(attrs={'type': 'date'}),
 			'bill_calculation_date': forms.DateInput(attrs={'type': 'date'}),
 			'last_date_for_payment'     : forms.DateInput(attrs={'type': 'date'}),
+		}
+		labels = {
+			'month_for_bill_calculation': 'Bill Date',
 		}
 
 
