@@ -138,8 +138,7 @@ class Messsettings(models.Model):
 
 	messcut_closing_time = models.TimeField()
 
-	mess_closed_from = models.DateField()
-	mess_closed_to = models.DateField()
+	mess_closed_days = models.IntegerField(default=0)
 
 	bill_calculation_date = models.DateField(default=datetime.date.today())
 

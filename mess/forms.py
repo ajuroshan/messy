@@ -88,6 +88,7 @@ class MesssettingsForm(forms.ModelForm):
 			'feast_charges',
 			'other_charges',
 			'month_for_bill_calculation',
+			'mess_closed_days',
 			'last_date_for_payment',
 			'per_day_fine_after_due_date',
 		]
