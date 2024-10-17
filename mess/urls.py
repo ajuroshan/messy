@@ -12,4 +12,5 @@ urlpatterns = [
     path('mark_attendance/',mark_attendance,name='mark_attendance'),
     path('attendance_details/',attendance_details,name='attendance_details'),
     path('feedback/',feedback,name='feedback'),
+    path('addd/',my_view,name='my_view'),
     ]

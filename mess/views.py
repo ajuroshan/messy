@@ -22,6 +22,8 @@ from django.template import loader
 from django.conf import settings
 from datetime import datetime
 from .forms import MesssettingsForm
+from .tasks import send_html_email
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +49,11 @@ def apply_for_messcut(request):
 				applicant.save()  # Save the Application instance to update the M2M relationship
 				messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
 				total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
-				try:
-					send_html_email("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation","user":request.user,"start_date": messcut.start_date,"end_date": messcut.end_date})
-				except Exception as e:
-					logger.error(f'Failed to send email to {request.user.email}: {e}')
-					print(f"Failed to send email to {request.user.email}: {e}")
+				#send_html_email("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation","user":request.user,"start_date": messcut.start_date,"end_date": messcut.end_date})
+				send_html_email.delay("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation",
+				                                                                     "user_name": f"{request.user.first_name } {request.user.last_name}",
+				                                                                     "start_date": messcut.start_date,
+				                                                                     "end_date": messcut.end_date})
 				return render(request, 'mess/apply.html',
 				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
 				               'message': 'Messcut applied successfully', 'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
@@ -285,32 +287,39 @@ def feedback(request):
 
 
 
-def send_html_email(subject, to_email, context):
-	try:
-		# Load the template
-		html_template = loader.get_template('email/email_template.html')
-
-		# Render the template with context
-		html_content = html_template.render(context)
-
-		# Strip the HTML content to create a plain text version
-		text_content = strip_tags(html_content)
-
-		# Create the email
-		email = EmailMultiAlternatives(
-			subject=subject,
-			body=text_content,  # Plain text content for email clients that don't support HTML
-			from_email=settings.EMAIL_HOST_USER,
-			to=[to_email]
-		)
-
-		# Attach the HTML content as an alternative
-		email.attach_alternative(html_content, "text/html")
-
-		# Send the email
-		email.send()
-	except Exception as e:
-		logger.error(f'Failed to send email to {to_email}: {e}')
-		return False
-	return True
+# def send_html_email(subject, to_email, context):
+# 	try:
+# 		# Load the template
+# 		html_template = loader.get_template('email/email_template.html')
+#
+# 		# Render the template with context
+# 		html_content = html_template.render(context)
+#
+# 		# Strip the HTML content to create a plain text version
+# 		text_content = strip_tags(html_content)
+#
+# 		# Create the email
+# 		email = EmailMultiAlternatives(
+# 			subject=subject,
+# 			body=text_content,  # Plain text content for email clients that don't support HTML
+# 			from_email=settings.EMAIL_HOST_USER,
+# 			to=[to_email]
+# 		)
+#
+# 		# Attach the HTML content as an alternative
+# 		email.attach_alternative(html_content, "text/html")
+#
+# 		# Send the email
+# 		email.send()
+# 	except Exception as e:
+# 		logger.error(f'Failed to send email to {to_email}: {e}')
+# 		return False
+# 	return True
 # TODO: Implement functionality for exporting bill data to CSV if required
+
+
+from .tasks import add
+
+def my_view(request):
+	result = add.delay(4, 99)  # Task is called asynchronously
+	return HttpResponse(f'Task ID: {result.task_id} and the result is {result.get()}')
