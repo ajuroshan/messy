@@ -53,7 +53,8 @@ def apply_for_messcut(request):
 				send_html_email.delay("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation",
 				                                                                     "user_name": f"{request.user.first_name } {request.user.last_name}",
 				                                                                     "start_date": messcut.start_date,
-				                                                                     "end_date": messcut.end_date})
+				                                                                     "end_date": messcut.end_date,
+				                                                                     "total_messcut_days": total_messcut_days})
 				return render(request, 'mess/apply.html',
 				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
 				               'message': 'Messcut applied successfully', 'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
