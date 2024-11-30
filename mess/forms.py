@@ -1,7 +1,10 @@
+import datetime
+import json
+
 from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date, timedelta
-from .models import Messcut, MessBill, Feedback
+from .models import Messcut, MessBill, Feedback, MessClosedDate
 from application.models import Application
 
 
@@ -77,8 +80,19 @@ class MesscutForm(forms.ModelForm):
 from django import forms
 from .models import Messsettings
 
+from django import forms
+
 
 class MesssettingsForm(forms.ModelForm):
+	mess_closed_dates = forms.CharField(
+		required=False,
+		widget=forms.TextInput(attrs={
+			'class'      : 'multi-date-picker',
+			'placeholder': 'Select multiple dates',
+		}),
+		label="Mess Closed Dates"
+	)
+
 	class Meta:
 		model = Messsettings
 		fields = [
@@ -88,18 +102,51 @@ class MesssettingsForm(forms.ModelForm):
 			'feast_charges',
 			'other_charges',
 			'month_for_bill_calculation',
-			'mess_closed_days',
 			'last_date_for_payment',
 			'per_day_fine_after_due_date',
+			'mess_closed_dates',
 		]
 		widgets = {
 			'month_for_bill_calculation': forms.DateInput(attrs={'type': 'date'}),
-			'bill_calculation_date': forms.DateInput(attrs={'type': 'date'}),
+			'bill_calculation_date'     : forms.DateInput(attrs={'type': 'date'}),
 			'last_date_for_payment'     : forms.DateInput(attrs={'type': 'date'}),
 		}
 		labels = {
 			'month_for_bill_calculation': 'Bill Date',
 		}
+
+	def clean_mess_closed_dates(self):
+		"""Validate the JSON input and ensure dates are in the correct format."""
+		data = self.cleaned_data.get('mess_closed_dates', '')
+		if data:
+			try:
+				# Attempt to parse as JSON directly
+				dates = json.loads(data)
+				if not isinstance(dates, list):
+					raise forms.ValidationError("Please provide a list of dates.")
+				# Validate each date
+				for date in dates:
+					datetime.datetime.strptime(date, "%Y-%m-%d")  # Ensure valid date format
+				return dates
+			except (ValueError, json.JSONDecodeError):
+				raise forms.ValidationError("Please enter valid JSON (e.g., ['2024-11-01', '2024-11-02']).")
+		return []
+
+	def save(self, commit=True):
+		"""Save the parsed dates into the related MessClosedDate model."""
+		instance = super().save(commit=False)
+		dates = self.cleaned_data.get('mess_closed_dates', [])
+
+		if commit:
+			instance.save()
+
+			# Clear old dates and create new ones
+			instance.mess_closed_dates.clear()
+			for date_str in dates:
+				date_obj, created = MessClosedDate.objects.get_or_create(date=date_str)
+				instance.mess_closed_dates.add(date_obj)
+
+		return instance
 
 
 class PayMessBillForm(forms.ModelForm):

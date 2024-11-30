@@ -4,6 +4,11 @@
 
 {% block title %}Mess Bill Admin{% endblock %}
 
+{% block styles %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+{% endblock %}
+
 {% block content %}
     <div class="bg-light py-3 py-md-5">
         <div class="container">
@@ -23,6 +28,25 @@
                                     <form method="post" class="w-100">
                                         {% csrf_token %}
                                         {{ form|crispy }}
+
+                                        <!-- Inline Formset for Adding Dates -->
+                                        <h3>Mess Closed Dates</h3>
+                                        {{ formset.management_form }}
+                                        <table class="table">
+                                            {% for form in formset %}
+                                                <tr>
+                                                    <td>
+                                                        <input type="date" name="{{ form.date.name }}"
+                                                               value="{{ form.date.value }}">
+                                                    </td>
+                                                    <td>
+                                                        {% if form.instance.pk %}
+                                                            <input type="checkbox" name="{{ form.DELETE.name }}"> Delete
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
                                         <button type="submit" class="btn btn-success btn-sm w-100">Calculate</button>
                                     </form>
 
@@ -37,4 +61,37 @@
 
 
 
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr(".multi-date-picker", {
+                mode: "multiple",
+                dateFormat: "Y-m-d",
+                onChange: function (selectedDates, dateStr, instance) {
+                    const formattedDates = selectedDates.map(date => instance.formatDate(date, "Y-m-d"));
+                    document.querySelector(".multi-date-picker").value = JSON.stringify(formattedDates); // Set JSON string
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const addDateButton = document.getElementById('add-date-button');
+            const formsetDiv = document.getElementById('formset-container');
+
+            addDateButton.addEventListener('click', () => {
+                const totalForms = document.querySelector('#id_messcloseddate_set-TOTAL_FORMS');
+                const currentCount = parseInt(totalForms.value, 10);
+
+                const newFormHtml = formsetDiv.dataset.emptyForm.replace(/__prefix__/g, currentCount);
+                formsetDiv.insertAdjacentHTML('beforeend', newFormHtml);
+
+                totalForms.value = currentCount + 1;
+            });
+        });
+
+
+    </script>
 {% endblock %}

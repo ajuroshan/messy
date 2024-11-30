@@ -15,6 +15,14 @@ class Messcut(models.Model):
 	def __str__(self):
 		return f"Messcut from {self.start_date} to {self.end_date}"
 
+	def get_date_range(self):
+		"""Returns a list of dates between start_date and end_date (inclusive)."""
+		if self.start_date > self.end_date:
+			raise ValueError("start_date cannot be after end_date")
+
+		delta = self.end_date - self.start_date  # Get the range
+		return [self.start_date + datetime.timedelta(days=i) for i in range(delta.days + 1)]
+
 
 class Messmenu(models.Model):
 	DAYS_OF_WEEK = [
@@ -85,6 +93,7 @@ class MessBill(models.Model):
 	feast_charges = models.IntegerField(default=0)
 	other_charges = models.IntegerField(default=0)
 	mess_cuts = models.IntegerField(default=0)
+	effective_mess_cuts = models.IntegerField(default=0)
 	amount = models.IntegerField(default=0)
 	month = models.DateField()
 
@@ -105,6 +114,13 @@ class Feedback(models.Model):
 
 	def __str__(self):
 		return f"{self.student.first_name} - {self.date}"
+
+
+class MessClosedDate(models.Model):
+	date = models.DateField()
+
+	def __str__(self):
+		return f"{self.date}"
 
 class Messsettings(models.Model):
 	total_days = models.IntegerField(default=30)
@@ -139,6 +155,7 @@ class Messsettings(models.Model):
 	messcut_closing_time = models.TimeField()
 
 	mess_closed_days = models.IntegerField(default=0)
+	mess_closed_dates = models.ManyToManyField(MessClosedDate, blank=True)
 
 	bill_calculation_date = models.DateField(default=datetime.date.today())
 
@@ -146,3 +163,6 @@ class Messsettings(models.Model):
 
 	def __str__(self):
 		return f"{self.total_days} days, {self.amount_per_day} per day"
+
+
+

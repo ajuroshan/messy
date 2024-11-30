@@ -35,6 +35,7 @@ def apply_for_messcut(request):
 	can_mark_messcut = timezone.localtime().time() < messcut_closing_time
 	application = Application.objects.filter(applicant=request.user).first()
 	messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
+	prev_messcuts = application.messcuts.exclude(start_date__month=datetime.today().month)
 	total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
 	if request.method == 'POST':
 		form = MesscutForm(request.POST, request=request)
@@ -56,7 +57,7 @@ def apply_for_messcut(request):
 				                                                                     "end_date": messcut.end_date,
 				                                                                     "total_messcut_days": total_messcut_days})
 				return render(request, 'mess/apply.html',
-				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,
+				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,"prev_messcuts":prev_messcuts,
 				               'message': 'Messcut applied successfully', 'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
 			else:
 				# Handle the case where no accepted application exists
@@ -65,7 +66,7 @@ def apply_for_messcut(request):
 		form = MesscutForm()
 
 	return render(request, 'mess/apply.html',
-	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
+	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,"prev_messcuts":prev_messcuts,'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
 
 
 def group_required(group_name):

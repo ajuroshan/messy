@@ -5,7 +5,6 @@ from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
 
-
 @admin.register(Messcut)
 class MesscutAdmin(admin.ModelAdmin):
 	list_display = ['start_date', 'end_date']

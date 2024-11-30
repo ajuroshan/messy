@@ -67,6 +67,7 @@ def mess_bill_admin(request):
 			calculate_mess_bill()
 			return redirect('view_mess_bill_admin')
 		else:
+			print(form.errors)
 			return HttpResponse('Error: Invalid form data')
 
 	else:
@@ -265,7 +266,7 @@ def calculate_mess_bill():
 	TOTAL_DAYS = messsettings.total_days
 	OTHER_CHARGES = messsettings.other_charges
 	FEAST_CHARGES = messsettings.feast_charges
-	MESS_CLOSED_DAYS = messsettings.mess_closed_days
+	MESS_CLOSED_DATES = [date.date for date in messsettings.mess_closed_dates.all()]
 	# vecation 12 to 22 sept
 
 
@@ -279,15 +280,15 @@ def calculate_mess_bill():
 		# Calculate total messcut days for the given month
 		messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
 		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
-		first_meal = MessAttendance.objects.filter(student=application,timestamp__month=BILL_DATE.month,timestamp__year=BILL_DATE.year).order_by('timestamp').first()
+		effective_messcut_days = total_messcut_days
 
-		# if first_attendance:
-		# 	effective_days = (BILL_DATE - first_attendance.date).days + 1
-		# else:
-		# 	effective_days = TOTAL_DAYS
+		for date in MESS_CLOSED_DATES:
+			for messcut in messcuts:
+				if date in messcut.get_date_range():
+					effective_messcut_days -= 1
 
-		# Calculate effective days and total amount
-		effective_days = TOTAL_DAYS - total_messcut_days
+
+		effective_days = TOTAL_DAYS - effective_messcut_days
 		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
 
 		# Create the mess bill
@@ -301,7 +302,8 @@ def calculate_mess_bill():
 			other_charges=OTHER_CHARGES,
 			feast_charges=FEAST_CHARGES,
 			total_days=TOTAL_DAYS,
-			mess_cuts=total_messcut_days
+			mess_cuts=total_messcut_days,
+			effective_mess_cuts=effective_messcut_days
 		)
 		application.save()
 
