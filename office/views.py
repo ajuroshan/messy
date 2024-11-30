@@ -100,6 +100,7 @@ def view_mess_bill_admin(request):
 	return render(request, 'admin/mess_bills_table.html',
 	              {'mess_bills': mess_bills, 'messsettings': messsettings})
 
+
 @staff_member_required
 def download_mess_bill_admin(request):
 	try:
@@ -119,7 +120,7 @@ def download_mess_bill_admin(request):
 
 	# Write the header row to the CSV file
 	writer.writerow(['Mess No', 'Name', 'Department', 'Semester', 'Total Days', 'Effective Days', 'Amount Per Day',
-	                 'Establishment Charges', 'Feast Charges', 'Other Charges', 'Mess Cuts',
+	                 'Establishment Charges', 'Feast Charges', 'Other Charges', 'Mess Cuts', 'Effective Mess Cuts',
 	                 'Total Amount', 'Paid', 'Date Paid'])
 
 	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
@@ -142,6 +143,7 @@ def download_mess_bill_admin(request):
 				bill.feast_charges,  # Feast Charges
 				bill.other_charges,  # Other Charges
 				bill.mess_cuts,  # Mess Cuts
+				bill.effective_mess_cuts,
 				bill.amount,  # Amount
 				'Yes' if bill.paid else 'No',  # Paid
 				bill.date_paid.strftime('%Y-%m-%d') if bill.date_paid else 'N/A'  # Date Paid
@@ -192,6 +194,7 @@ def messcut_details_admin(request):
 	print(context)
 
 	return render(request, 'admin/messcut_details.html', context)
+
 
 @staff_member_required
 def attendance_cut_details_admin(request):
@@ -245,10 +248,10 @@ def attendance_cut_details_admin(request):
 
 	# Render the results to a template
 	context = {
-		'today'                          : today,
-		'breakfast_not_attended'         : breakfast_not_attended_details,
-		'lunch_not_attended'             : lunch_not_attended_details,
-		'dinner_not_attended'            : dinner_not_attended_details,
+		'today'                 : today,
+		'breakfast_not_attended': breakfast_not_attended_details,
+		'lunch_not_attended'    : lunch_not_attended_details,
+		'dinner_not_attended'   : dinner_not_attended_details,
 	}
 	return render(request, 'admin/attendance_cut_details.html', context)
 
@@ -269,14 +272,12 @@ def calculate_mess_bill():
 	MESS_CLOSED_DATES = [date.date for date in messsettings.mess_closed_dates.all()]
 	# vecation 12 to 22 sept
 
-
-
 	mess_bills = MessBill.objects.filter(month__month=BILL_DATE.month)
 	if mess_bills.exists():
 		mess_bills.delete()
 
 	# Iterate through accepted applications
-	for application in Application.objects.filter(accepted=True,claim=False):
+	for application in Application.objects.filter(accepted=True, claim=False):
 		# Calculate total messcut days for the given month
 		messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
 		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
@@ -286,7 +287,6 @@ def calculate_mess_bill():
 			for messcut in messcuts:
 				if date in messcut.get_date_range():
 					effective_messcut_days -= 1
-
 
 		effective_days = TOTAL_DAYS - effective_messcut_days
 		total_amount = (AMOUNT_PER_DAY * effective_days) + (ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES)
