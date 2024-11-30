@@ -207,7 +207,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'ajuaju0483@gmail.com'
+DEFAULT_FROM_EMAIL = 'sagarmess24@gmail.com'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
@@ -222,3 +222,12 @@ LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 ACCOUNT_LOGOUT_ON_GET = True
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # URL to Redis broker
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis for storing results
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
