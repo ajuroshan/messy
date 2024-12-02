@@ -2,7 +2,7 @@ from django.shortcuts import render
 import csv
 import logging
 import smtplib
-from datetime import datetime
+from datetime import datetime as dt
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import loader
 from django.utils.html import strip_tags
@@ -34,7 +34,7 @@ def attendance_details_admin(request):
 	today = date.today()
 	if request.method == 'POST':
 		try:
-			today = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+			today = dt.strptime(request.POST.get('date'), '%Y-%m-%d').date()
 		except ValueError:
 			return HttpResponse('Invalid date format')
 	context = {}
@@ -159,7 +159,7 @@ def messcut_details_admin(request):
 	today = date.today()
 	if request.method == 'POST':
 		try:
-			today = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+			today = dt.strptime(request.POST.get('date'), '%Y-%m-%d').date()
 		except ValueError:
 			return HttpResponse('Invalid date format')
 
@@ -202,7 +202,7 @@ def attendance_cut_details_admin(request):
 
 	if request.method == 'POST':
 		try:
-			today = datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+			today = dt.strptime(request.POST.get('date'), '%Y-%m-%d').date()
 		except ValueError:
 			return HttpResponse('Invalid date format')
 
