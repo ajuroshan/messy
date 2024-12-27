@@ -1,11 +1,11 @@
 import datetime
 import json
-
-from django import forms
 from django.core.exceptions import ValidationError
 from datetime import date, timedelta
 from .models import Messcut, MessBill, Feedback, MessClosedDate
 from application.models import Application
+from .models import Messsettings
+from django import forms
 
 
 class MesscutForm(forms.ModelForm):
@@ -49,8 +49,8 @@ class MesscutForm(forms.ModelForm):
 			# Ensure both dates are in the same month
 			if start_date.month != end_date.month or start_date.year != end_date.year:
 				raise ValidationError("The start and end dates must be in the same month.")
-			if start_date.month != date.today().month or start_date.year != date.today().year:
-				raise ValidationError("The start date must be in the current month.")
+			# if start_date.month != date.today().month or start_date.year != date.today().year:
+			# 	raise ValidationError("The start date must be in the current month.")
 			current_messcut_days = (end_date - start_date).days + 1
 
 			# Check for overlapping mess cuts
@@ -75,13 +75,6 @@ class MesscutForm(forms.ModelForm):
 								"The total number of mess cut days for the month cannot exceed 8 days.")
 
 		return cleaned_data
-
-
-from django import forms
-from .models import Messsettings
-
-from django import forms
-
 
 class MesssettingsForm(forms.ModelForm):
 	mess_closed_dates = forms.CharField(
