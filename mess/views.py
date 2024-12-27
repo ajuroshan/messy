@@ -52,11 +52,11 @@ def apply_for_messcut(request):
 				messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
 				total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
 				#send_html_email("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation","user":request.user,"start_date": messcut.start_date,"end_date": messcut.end_date})
-				# send_html_email.delay("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation",
-				#                                                                      "user_name": f"{request.user.first_name } {request.user.last_name}",
-				#                                                                      "start_date": messcut.start_date,
-				#                                                                      "end_date": messcut.end_date,
-				#                                                                      "total_messcut_days": total_messcut_days})
+				send_html_email.delay("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation",
+				                                                                     "user_name": f"{request.user.first_name } {request.user.last_name}",
+				                                                                     "start_date": messcut.start_date,
+				                                                                     "end_date": messcut.end_date,
+				                                                                     "total_messcut_days": total_messcut_days})
 				return render(request, 'mess/apply.html',
 				              {'form'   : form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,"prev_messcuts":prev_messcuts,"future_messcuts":future_messcuts,
 				               'message': 'Messcut applied successfully', 'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
