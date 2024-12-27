@@ -342,3 +342,29 @@ def send_mess_bill_mail_admin(request):
 		return HttpResponse(f'Email sent with some failures. Failed emails: {", ".join(failed_emails)}')
 
 	return HttpResponse('Email sent successfully')
+
+@staff_member_required()
+def individual_attendance(request):
+	if request.method == "POST":
+		context = {}
+		mess_no = request.POST.get("mess_no")
+		date_of_attendance = request.POST.get("date_of_attendance")
+		year_of_attendance = date_of_attendance.split("-")[0]
+		month_of_attendance = date_of_attendance.split("-")[1]
+		application = Application.objects.filter(mess_no__exact=mess_no)
+		if not application:
+			context['message'] = "Mess number not found!"
+			return render(request, 'admin/individual_attendance.html', context)
+		total_attendance = MessAttendance.objects.filter(student=application.first(),
+		                                                 timestamp__month=month_of_attendance,
+		                                                 timestamp__year=year_of_attendance)
+		breakfast_attendance = total_attendance.filter(meal='breakfast')
+		lunch_attendance = total_attendance.filter(meal='lunch')
+		dinner_attendance = total_attendance.filter(meal='dinner')
+
+		context['breakfast_attendance'] = breakfast_attendance
+		context['lunch_attendance'] = lunch_attendance
+		context['dinner_attendance'] = dinner_attendance
+		context['name_of_student'] = application.first().first_name + " " + application.first().last_name
+		return render(request, 'admin/individual_attendance.html', context)
+	return render(request, 'admin/individual_attendance.html')

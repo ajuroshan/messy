@@ -10,4 +10,5 @@ urlpatterns = [
 	path('messcut_details_admin/', messcut_details_admin, name='messcut_details_admin'),
 	path('attendance_details_admin/', attendance_details_admin, name='attendance_details_admin'),
 	path('attendance_cut_details_admin/', attendance_cut_details_admin, name='attendance_cut_details_admin'),
+	path('individual_attendance/', individual_attendance, name='individual_attendance'),
 ]
