@@ -52,16 +52,22 @@ Hostel Mess Management System is a Django-based web application designed to stre
 *Add screenshots here to demonstrate key features of the application.*
 
 - **Dashboard:**
-  ![Dashboard](screenshots/dashboard.png)
+  ![Dashboard](screenshots/a1.png)
 
 - **Apply for Messcut:**
-  ![Apply for Messcut](screenshots/apply_messcut.png)
+  ![Apply for Messcut](screenshots/a2.png)
 
 - **QR Code Scanning:**
-  ![QR Code Scanning](screenshots/scan_qr.png)
+  ![QR Code Scanning](screenshots/a3.png)
 
 - **View and Pay Mess Bill:**
-  ![View and Pay Mess Bill](screenshots/view_pay_bill.png)
+  ![View and Pay Mess Bill](screenshots/a4.png)
+
+- **View and Pay Mess Bill:**
+  ![View and Pay Mess Bill](screenshots/a5.png)
+
+- **View and Pay Mess Bill:**
+  ![View and Pay Mess Bill](screenshots/a6.png)
 
 ## Usage
 
