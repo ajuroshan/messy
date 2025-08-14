@@ -23,6 +23,7 @@ from django.conf import settings
 from datetime import datetime
 from .forms import MesssettingsForm
 from .tasks import send_html_email
+from application.models import Application
 
 
 logger = logging.getLogger(__name__)
@@ -127,11 +128,22 @@ def mark_attendance(request):
 			timestamp__year=datetime.today().year
 		).count()
 
-		if mess_no and not qr_code_data:
-			qr_code_data = mess_no
+		if qr_code_data:
+			hostel_code = Application.objects.filter(applicant=request.user, accepted=True).first().hostel.code
+			hostel_dode_from_qr = qr_code_data.split('-')[0]
+			if hostel_dode_from_qr != hostel_code:
+				return JsonResponse({
+					"status": "error",
+					"message": f"User from {hostel_dode_from_qr} Hostel, No Entry Allowed",
+					"app_details": {}
+				}, status=400)
 
+
+		if mess_no and not qr_code_data:
+			hostel_code = Application.objects.filter(applicant=request.user, accepted=True).first().hostel.code
+			qr_code_data = f"{hostel_code}-{mess_no}"
 		try:
-			qr_code_data = int(qr_code_data)
+			print(qr_code_data)
 		except ValueError:
 			return JsonResponse({
 				"status"     : "error",
@@ -162,10 +174,12 @@ def mark_attendance(request):
 					attendance = MessAttendance.objects.create(
 						student=application,
 						meal=meal,
-						timestamp=timezone.now()
+						timestamp=timezone.now(),
+						hostel = application.hostel,
 					)
 					meal_attendance = MessAttendance.objects.filter(
 						meal=meal,
+						hostel=application.hostel,
 						timestamp__day=datetime.today().day,
 						timestamp__month=datetime.today().month,
 						timestamp__year=datetime.today().year

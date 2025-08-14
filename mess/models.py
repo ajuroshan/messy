@@ -57,6 +57,7 @@ class MessAttendance(models.Model):
 	meal = models.CharField(max_length=10, choices=MEAL_CHOICES)
 	timestamp = models.DateTimeField(auto_now_add=True)
 	student = models.ForeignKey('application.Application', on_delete=models.CASCADE, blank=True, null=True)
+	hostel = models.ForeignKey('application.Hostel', on_delete=models.CASCADE, blank=True, null=True)
 
 	class Meta:
 		unique_together = ('meal', 'student', 'date')
