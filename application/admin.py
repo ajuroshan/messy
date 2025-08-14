@@ -235,3 +235,8 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 
 	def get_queryset(self, request):
 		return Application.objects.filter(accepted=True).order_by("-created_at")
+
+
+admin.site.register(Hostel)
+admin.site.register(Department)
+

@@ -57,13 +57,13 @@ CORS_ORIGIN_WHITELIST = [
 CORS_ORIGIN_ALLOW_ALL = False
 
 
-SITE_ID = 5
+SITE_ID = 6
 
 # Application definition
 
 INSTALLED_APPS = [
 	'jazzmin',
-        'django.contrib.admin',
+    'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
@@ -71,10 +71,10 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 
 	'django.contrib.sites',
-        'allauth',
-        'allauth.account',
-        'allauth.socialaccount',
-        'allauth.socialaccount.providers.google',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 	'crispy_forms',
 	'crispy_bootstrap5',
 

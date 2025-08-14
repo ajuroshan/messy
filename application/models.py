@@ -12,18 +12,6 @@ hostels = [
 
 ]
 
-departments = [
-	('cse', 'CSE'),
-	('ece', 'ECE'),
-	('mech', 'MECH'),
-	('civil', 'CIVIL'),
-	('eee', 'EEE'),
-	('it', 'IT'),
-	('saftey', 'SAFTEY'),
-	('mtech', 'MTECH'),
-	('main_campus', 'MAIN CAMPUS'),
-]
-
 food_preferences = [
 	('veg', 'Veg'),
 	('nonveg', 'Non-Veg'),
@@ -38,20 +26,19 @@ semester_choices = [
 	('S6', 'S6'),
 	('S7', 'S7'),
 	('S8', 'S8'),
-
 ]
 
 
 class Application(models.Model):
-	applicant = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+	applicant = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='applications')
 	first_name = models.CharField(max_length=100)
 	last_name = models.CharField(max_length=100, blank=True, null=True)
-	mess_no = models.IntegerField(default=100)
-	hostel = models.CharField(max_length=100, choices=hostels, default='Sagar')
+	mess_no = models.CharField(max_length=100, blank=True, null=True)
+	hostel = models.ForeignKey('application.Hostel', on_delete=models.CASCADE)
 	accepted = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	messcuts = models.ManyToManyField(Messcut, blank=True,related_name='application')
-	department = models.CharField(max_length=100, choices=departments, default='')
+	department = models.ForeignKey('application.Department', on_delete=models.CASCADE)
 	semester = models.CharField(max_length=100, choices=semester_choices, default='')
 	outmess = models.BooleanField(default=False)
 	food_preference = models.CharField(max_length=100, choices=food_preferences, default='nonveg')
@@ -67,23 +54,38 @@ class Application(models.Model):
 		return str(self.applicant.username + ' - ' + str(self.mess_no))
 
 	def save(self, *args, **kwargs):
-		if not self.pk:  # Only generate a QR code for new applications
-			last_application = Application.objects.order_by('mess_no').last()
-			if last_application:
-				self.mess_no = last_application.mess_no + 1
-			else:
-				self.mess_no = 100
+		if not self.pk:  # Only for new applications
+			hostel_code = self.hostel.code
 
+			# Get the last application for this specific hostel
+			last_application = Application.objects.filter(
+				hostel=self.hostel
+			).order_by('-mess_no').first()
+
+			if last_application:
+				# mess_no is stored as 'shr-1', so split and get the numeric part
+				try:
+					last_num = int(str(last_application.mess_no).split('-')[-1])
+				except (ValueError, AttributeError):
+					last_num = 0
+				next_num = last_num + 1
+			else:
+				next_num = 1
+
+			# Format mess_no as "{code}-{number}"
+			self.mess_no = f"{hostel_code}-{next_num}"
+
+			# Generate QR code
 			qr = qrcode.QRCode(
 				version=1,
 				error_correction=qrcode.constants.ERROR_CORRECT_L,
 				box_size=10,
 				border=4,
 			)
-			qr.add_data(str(self.mess_no))  # Use application ID or another unique identifier
+			qr.add_data(self.mess_no)  # Use the formatted mess_no
 			qr.make(fit=True)
 
-			img = qr.make_image(fill='black', back_color='white')
+			img = qr.make_image(fill_color='black', back_color='white')
 			img_io = BytesIO()
 			img.save(img_io, format='PNG')
 			img_file = File(img_io, name=f'{self.mess_no}.png')
@@ -91,8 +93,6 @@ class Application(models.Model):
 			self.qr_code.save(f'{self.mess_no}.png', img_file, save=False)
 
 		super().save(*args, **kwargs)
-
-
 
 
 class AcceptedApplication(Application):
@@ -103,3 +103,21 @@ class AcceptedApplication(Application):
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	profile_pic = models.URLField(max_length=200, blank=True, null=True)
+
+
+class Hostel(models.Model):
+	name = models.CharField(max_length=100)
+	mess_sec = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='hostels')
+	code = models.CharField(max_length=10)
+	assistant_mess_sec = models.CharField(max_length=100, blank=True, null=True)
+
+	def __str__(self):
+		return self.name
+
+
+class Department(models.Model):
+	name = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.name
+
