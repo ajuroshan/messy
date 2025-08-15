@@ -31,33 +31,33 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['13.235.238.101','messy.cusat.live','localhost','127.0.0.1','13.200.237.86']
+ALLOWED_HOSTS = ['13.235.238.101','messy.cusat.xyz','localhost','127.0.0.1','13.200.237.86']
 
 CORS_ALLOWED_ORIGINS = [
-    'http://13.235.238.101',  # Add the origin here
-    'http://messy.cusat.live',
-    'https://messy.cusat.live'
+    'http://13.200.237.86',  # Add the origin here
+    'http://messy.cusat.xyz',
+    'https://messy.cusat.xyz'
     # Add other trusted origins as needed
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://13.235.238.101',  # Add the origin here
-    'http://messy.cusat.live',
-    'https://messy.cusat.live'
+    'http://13.200.237.86',  # Add the origin here
+    'http://messy.cusat.xyz',
+    'https://messy.cusat.xyz'
     # Add other trusted origins as needed
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    'http://13.235.238.101',  # Add the origin here
-    'http://messy.cusat.live',
-    'https://messy.cusat.live'
+    'http://13.200.237.86',  # Add the origin here
+    'http://messy.cusat.xyz',
+    'https://messy.cusat.xyz'
     # Add other trusted origins as needed
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
 
 
-SITE_ID = 6
+SITE_ID = 7
 
 # Application definition
 
