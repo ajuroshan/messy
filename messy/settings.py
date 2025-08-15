@@ -31,7 +31,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['13.235.238.101','messy.cusat.live','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['13.235.238.101','messy.cusat.live','localhost','127.0.0.1','13.200.237.86']
 
 CORS_ALLOWED_ORIGINS = [
     'http://13.235.238.101',  # Add the origin here
