@@ -26,3 +26,5 @@ requests-oauthlib==2.0.0
 sqlparse==0.5.1
 typing_extensions==4.12.2
 urllib3==2.2.2
+celery==5.5.3
+psycopg2==2.9.10

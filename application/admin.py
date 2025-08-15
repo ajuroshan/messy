@@ -94,6 +94,18 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 	dismiss_mess_assistant.short_description = "Dismiss selected mess assistants"
 
+	def get_queryset(self, request):
+		qs = super().get_queryset(request)
+		# superuser still sees everything
+		if request.user.is_superuser:
+			return qs
+
+		# if you’ve ensured each user is in exactly one Django Group:
+		hostel = Hostel.objects.filter(mess_sec = request.user).first()
+		if not hostel:
+			return qs.none()  # no group, no records
+		return qs.filter(hostel=hostel)
+
 
 
 
@@ -235,6 +247,19 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 
 	def get_queryset(self, request):
 		return Application.objects.filter(accepted=True).order_by("-created_at")
+
+
+	def get_queryset(self, request):
+		qs = super().get_queryset(request)
+		# superuser still sees everything
+		if request.user.is_superuser:
+			return qs
+
+		# if you’ve ensured each user is in exactly one Django Group:
+		hostel = Hostel.objects.filter(mess_sec = request.user).first()
+		if not hostel:
+			return qs.none()  # no group, no records
+		return qs.filter(hostel=hostel)
 
 
 admin.site.register(Hostel)
