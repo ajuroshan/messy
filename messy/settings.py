@@ -57,7 +57,7 @@ CORS_ORIGIN_WHITELIST = [
 CORS_ORIGIN_ALLOW_ALL = False
 
 
-SITE_ID = 7
+SITE_ID = 6
 
 # Application definition
 
