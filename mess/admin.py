@@ -1,9 +1,7 @@
 from django.contrib import admin
 from .models import *
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponseRedirect
-from django.utils.html import format_html
+from application.models import Hostel
 
 @admin.register(Messcut)
 class MesscutAdmin(admin.ModelAdmin):
@@ -43,6 +41,18 @@ class MesssettingsAdmin(admin.ModelAdmin):
 	list_filter = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
 	search_fields = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
 	list_per_page = 10
+
+	def get_queryset(self, request):
+		qs = super().get_queryset(request)
+		# superuser still sees everything
+		if request.user.is_superuser:
+			return qs
+
+		# if you’ve ensured each user is in exactly one Django Group:
+		hostel = Hostel.objects.filter(mess_sec = request.user).first()
+		if not hostel:
+			return qs.none()  # no group, no records
+		return qs.filter(hostel=hostel)
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
