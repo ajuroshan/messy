@@ -37,10 +37,12 @@ class MessBillAdmin(admin.ModelAdmin):
 
 @admin.register(Messsettings)
 class MesssettingsAdmin(admin.ModelAdmin):
-	list_display = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
-	list_filter = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
-	search_fields = ['total_days', 'amount_per_day', 'establishment_charges', 'feast_charges', 'other_charges']
+	list_display = ['name']
+	readonly_fields = ['hostel']
 	list_per_page = 10
+
+	def name(self):
+		return 'Messsettings'
 
 	def get_queryset(self, request):
 		qs = super().get_queryset(request)
