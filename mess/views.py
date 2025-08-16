@@ -32,13 +32,19 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @login_required
 def apply_for_messcut(request):
-	messcut_closing_time = Messsettings.objects.first().messcut_closing_time
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+	mess_settings = Messsettings.objects.filter(hostel=hostel).first()
+
+	messcut_closing_time = mess_settings.messcut_closing_time
 	can_mark_messcut = timezone.localtime().time() < messcut_closing_time
+
+
 	application = Application.objects.filter(applicant=request.user).first()
 	messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
 	prev_messcuts = application.messcuts.filter(start_date__month__lte=datetime.today().month,start_date__year__lte=datetime.today().year)
 	future_messcuts = application.messcuts.exclude(start_date__month__lte=datetime.today().month,start_date__year__lte=datetime.today().year)
 	total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+
 	if request.method == 'POST':
 		form = MesscutForm(request.POST, request=request)
 		if form.is_valid():
@@ -47,6 +53,7 @@ def apply_for_messcut(request):
 			applicant = Application.objects.filter(applicant=request.user, accepted=True).first()
 
 			if applicant:
+				messcut.hostel = applicant.hostel
 				messcut.save()  # Save the Messcut instance first
 				applicant.messcuts.add(messcut)  # Add the Messcut to the applicant's messcuts
 				applicant.save()  # Save the Application instance to update the M2M relationship
@@ -84,7 +91,8 @@ def scan_qr(request):
 
 	# Fetch meal times from Messsettings
 	try:
-		mess_settings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		mess_settings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
@@ -109,7 +117,8 @@ def mark_attendance(request):
 		current_time = timezone.localtime().time()
 
 		# Fetch meal times from Messsettings
-		mess_settings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		mess_settings = Messsettings.objects.filter(hostel=hostel).first()
 
 		# Set meal based on current local time
 		if mess_settings.breakfast_start_time <= current_time < mess_settings.breakfast_end_time:

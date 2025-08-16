@@ -67,7 +67,7 @@ class MessAttendance(models.Model):
 		current_time = timezone.localtime().time()
 
 		# Fetch meal times from Messsettings
-		mess_settings = Messsettings.objects.first()
+		mess_settings = Messsettings.objects.filter(hostel=self.hostel).first()
 
 		# Set meal based on current local time
 		if mess_settings.breakfast_start_time <= current_time < mess_settings.breakfast_end_time:
@@ -159,8 +159,6 @@ class Messsettings(models.Model):
 
 	bill_calculation_date = models.DateField(default=datetime.date.today())
 	hostel = models.OneToOneField('application.Hostel', on_delete=models.CASCADE)
-
-
 
 	def __str__(self):
 		return f"{self.total_days} days, {self.amount_per_day} per day"

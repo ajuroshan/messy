@@ -8,8 +8,57 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["gunicorn", "-b", "0.0.0.0:8000", "messy.wsgi:application"]
+    restart: unless-stopped
+    networks:
+      - nginx_network
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "messy", "worker", "-l", "info"]
+    restart: unless-stopped
+    networks:
+      - nginx_network
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    command: ["celery", "-A", "messy", "beat", "-l", "info"]
+    restart: unless-stopped
+    networks:
+      - nginx_network
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     restart: unless-stopped
     networks:
       - nginx_network
@@ -41,24 +90,28 @@ services:
       - ./static:/code/static
       - ./media:/code/media
       - ./nginx/secure/:/etc/nginx/templates/
-      -  /etc/localtime:/etc/localtime:ro
+      - /etc/localtime:/etc/localtime:ro
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
       - ./nginx/99-autoreload.sh:/docker-entrypoint.d/99-autoreload.sh
     depends_on:
-      - web
+      web:
+        condition: service_started
     networks:
       - nginx_network
 
   certbot:
-      image: certbot/certbot
-      volumes:
-        - ./nginx/certbot/conf:/etc/letsencrypt
-        - ./nginx/certbot/www:/var/www/certbot
-      entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"  # Renew certificates every 12 hours
+    image: certbot/certbot
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c 'trap exit TERM; while :; do
+      certbot renew; sleep 12h & wait $${!}; done;'
 
 networks:
   nginx_network:
 
 volumes:
   postgres_data:
+  redis_data:
