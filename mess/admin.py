@@ -37,12 +37,14 @@ class MessBillAdmin(admin.ModelAdmin):
 
 @admin.register(Messsettings)
 class MesssettingsAdmin(admin.ModelAdmin):
-	list_display = ['name']
+	list_display = ['display_name']
 	readonly_fields = ['hostel']
 	list_per_page = 10
 
-	def name(self):
-		return 'Messsettings'
+	def display_name(self, obj):
+		return "Messsettings"
+	display_name.short_description = "Name"
+
 
 	def get_queryset(self, request):
 		qs = super().get_queryset(request)
