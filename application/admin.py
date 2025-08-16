@@ -245,21 +245,21 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
 
 	cancel_outmess.short_description = "Dismiss selected applications as Outmess"
 
-	def get_queryset(self, request):
-		return Application.objects.filter(accepted=True).order_by("-created_at")
+	# def get_queryset(self, request):
+	# 	return Application.objects.filter(accepted=True).order_by("-created_at")
 
 
 	def get_queryset(self, request):
 		qs = super().get_queryset(request)
 		# superuser still sees everything
 		if request.user.is_superuser:
-			return qs
+			return qs.filter(accepted=True).order_by("-created_at")
 
 		# if you’ve ensured each user is in exactly one Django Group:
 		hostel = Hostel.objects.filter(mess_sec = request.user).first()
 		if not hostel:
 			return qs.none()  # no group, no records
-		return qs.filter(hostel=hostel)
+		return qs.filter(hostel=hostel,accepted=True).order_by("-created_at")
 
 
 admin.site.register(Hostel)

@@ -38,8 +38,10 @@ def attendance_details_admin(request):
 		except ValueError:
 			return HttpResponse('Invalid date format')
 	context = {}
+
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
 	attendance_today = MessAttendance.objects.filter(timestamp__day=today.day, timestamp__month=today.month,
-	                                                 timestamp__year=today.year)
+	                                                 timestamp__year=today.year,hostel=hostel)
 	breakfast_attendance = attendance_today.filter(meal='breakfast')
 	lunch_attendance = attendance_today.filter(meal='lunch')
 	dinner_attendance = attendance_today.filter(meal='dinner')
@@ -54,8 +56,8 @@ def attendance_details_admin(request):
 @staff_member_required
 def mess_bill_admin(request):
 	try:
-		# Assume there is only one Messsettings instance
-		messsettings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
@@ -79,8 +81,8 @@ def mess_bill_admin(request):
 @staff_member_required
 def view_mess_bill_admin(request):
 	try:
-		# Assume there is only one Messsettings instance
-		messsettings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
@@ -104,8 +106,8 @@ def view_mess_bill_admin(request):
 @staff_member_required
 def download_mess_bill_admin(request):
 	try:
-		# Assume there is only one Messsettings instance
-		messsettings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
