@@ -38,7 +38,7 @@ class MessBillAdmin(admin.ModelAdmin):
 @admin.register(Messsettings)
 class MesssettingsAdmin(admin.ModelAdmin):
 	list_display = ['display_name']
-	readonly_fields = ['hostel']
+	# readonly_fields = ['hostel']
 	list_per_page = 10
 
 	def display_name(self, obj):
