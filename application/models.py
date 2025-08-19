@@ -47,6 +47,9 @@ class Application(models.Model):
 	attendance = models.ManyToManyField(MessAttendance, blank=True)
 	mess_bill = models.ManyToManyField(MessBill, blank=True,related_name='application')
 	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+	student_id = models.CharField(max_length=100)
+	phone_number = models.CharField(max_length=100)
+
 
 	official_outmess = models.BooleanField(default=False)
 
