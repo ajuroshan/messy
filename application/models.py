@@ -49,6 +49,7 @@ class Application(models.Model):
 	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 	student_id = models.CharField(max_length=100)
 	phone_number = models.CharField(max_length=100)
+	mess_no_number = models.IntegerField(default=0)
 
 
 	official_outmess = models.BooleanField(default=False)
@@ -57,25 +58,16 @@ class Application(models.Model):
 		return str(self.applicant.username + ' - ' + str(self.mess_no))
 
 	def save(self, *args, **kwargs):
-		if not self.pk:  # Only for new applications
+		if not self.pk:
 			hostel_code = self.hostel.code
 
-			# Get the last application for this specific hostel
 			last_application = Application.objects.filter(
 				hostel=self.hostel
-			).order_by('-mess_no').first()
+			).order_by('-mess_no_number').first()
 
-			if last_application:
-				# mess_no is stored as 'shr-1', so split and get the numeric part
-				try:
-					last_num = int(str(last_application.mess_no).split('-')[-1])
-				except (ValueError, AttributeError):
-					last_num = 0
-				next_num = last_num + 1
-			else:
-				next_num = 1
+			next_num = (last_application.mess_no_number if last_application else 0) + 1
 
-			# Format mess_no as "{code}-{number}"
+			self.mess_no_number = next_num
 			self.mess_no = f"{hostel_code}-{next_num}"
 
 			# Generate QR code
@@ -123,4 +115,3 @@ class Department(models.Model):
 
 	def __str__(self):
 		return self.name
-
