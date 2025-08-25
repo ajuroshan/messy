@@ -43,7 +43,7 @@ def apply_for_messcut(request):
 	messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
 	prev_messcuts = application.messcuts.filter(start_date__month__lte=datetime.today().month,start_date__year__lte=datetime.today().year)
 	future_messcuts = application.messcuts.exclude(start_date__month__lte=datetime.today().month,start_date__year__lte=datetime.today().year)
-	total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+	total_messcut_days = calculate_total_messcut_days(messcuts,hostel)
 
 	if request.method == 'POST':
 		form = MesscutForm(request.POST, request=request)
@@ -58,7 +58,7 @@ def apply_for_messcut(request):
 				applicant.messcuts.add(messcut)  # Add the Messcut to the applicant's messcuts
 				applicant.save()  # Save the Application instance to update the M2M relationship
 				messcuts = application.messcuts.filter(start_date__month=datetime.today().month)
-				total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+				total_messcut_days = calculate_total_messcut_days(messcuts,hostel)
 				#send_html_email("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation","user":request.user,"start_date": messcut.start_date,"end_date": messcut.end_date})
 				send_html_email.delay("Mess Cut Confirmation", request.user.email , {"subject":"Mess Cut Confirmation",
 				                                                                     "user_name": f"{request.user.first_name } {request.user.last_name}",
@@ -76,6 +76,7 @@ def apply_for_messcut(request):
 
 	return render(request, 'mess/apply.html',
 	              {'form': form, 'total_messcut_days': total_messcut_days, 'messcuts': messcuts,"prev_messcuts":prev_messcuts,"future_messcuts":future_messcuts,'can_mark_messcut': can_mark_messcut,'messcut_closing_time': messcut_closing_time})
+
 
 
 def group_required(group_name):
@@ -349,3 +350,20 @@ from .tasks import add
 def my_view(request):
 	result = add.delay(4, 99)  # Task is called asynchronously
 	return HttpResponse(f'Task ID: {result.task_id} and the result is {result.get()}')
+
+
+
+def calculate_total_messcut_days(messcuts, hostel):
+    total_days = 0
+    if hostel.name == "Swaraj":
+        for messcut in messcuts:
+            days = (messcut.end_date - messcut.start_date).days + 1
+            if days == 2:
+                total_days += 1
+            elif days == 3:
+                total_days += 2
+            else:
+                total_days += days
+        return total_days
+    else:
+        return sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts )
