@@ -97,9 +97,9 @@ def view_mess_bill_admin(request):
 			messsettings.publish_mess_bill = False
 		messsettings.save()
 
-	subquery = Application.objects.filter(mess_bill=OuterRef('pk')).order_by('mess_no').values('mess_no')[:1]
-	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).annotate(
-		mess_no=Subquery(subquery)).order_by('mess_no')
+	subquery = Application.objects.filter(mess_bill=OuterRef('pk'),hostel=hostel).order_by('mess_no_number').values('mess_no')[:1]
+	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month,hostel=hostel).annotate(
+		mess_no=Subquery(subquery)).order_by('mess_no_number')
 
 	return render(request, 'admin/mess_bills_table.html',
 	              {'mess_bills': mess_bills, 'messsettings': messsettings})
