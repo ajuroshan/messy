@@ -358,6 +358,8 @@ def individual_attendance(request):
 	if request.method == "POST":
 		context = {}
 		mess_no = request.POST.get("mess_no")
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		mess_no = f"{hostel.code}-{mess_no}"
 		date_of_attendance = request.POST.get("date_of_attendance")
 		year_of_attendance = date_of_attendance.split("-")[0]
 		month_of_attendance = date_of_attendance.split("-")[1]
@@ -378,3 +380,15 @@ def individual_attendance(request):
 		context['name_of_student'] = application.first().first_name + " " + application.first().last_name
 		return render(request, 'admin/individual_attendance.html', context)
 	return render(request, 'admin/individual_attendance.html')
+
+#
+#
+# @staff_member_required()
+# def individual_messcut(request):
+# 	if request.method == "POST":
+# 		context = {}
+# 		mess_no = request.POST.get("mess_no")
+# 		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+# 		mess_no = f"{hostel.code}-{mess_no}"
+#
+# 	return render(request, 'admin/individual_attendance.html')
