@@ -117,7 +117,7 @@ def download_mess_bill_admin(request):
 	# Create the HttpResponse object with the appropriate CSV header
 	response = HttpResponse(content_type='text/csv')
 	response[
-		'Content-Disposition'] = f"attachment; filename={messsettings.month_for_bill_calculation.strftime('%B %Y')} Messbill.csv"
+		'Content-Disposition'] = f"attachment; filename={messsettings.hostel}-{messsettings.month_for_bill_calculation.strftime('%B %Y')} Messbill.csv"
 
 	# Create a CSV writer
 	writer = csv.writer(response)
@@ -127,8 +127,8 @@ def download_mess_bill_admin(request):
 	                 'Establishment Charges', 'Feast Charges', 'Other Charges', 'Mess Cuts', 'Effective Mess Cuts',
 	                 'Total Amount', 'Paid', 'Date Paid'])
 
-	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month).order_by(
-		'application__mess_no')
+	mess_bills = MessBill.objects.filter(month__month=messsettings.month_for_bill_calculation.month,hostel=hostel).order_by(
+		'application__mess_no_number')
 
 	# Write data rows to the CSV file
 	for bill in mess_bills:
