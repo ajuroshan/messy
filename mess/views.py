@@ -356,7 +356,7 @@ def my_view(request):
 
 def calculate_total_messcut_days(messcuts, hostel):
     total_days = 0
-    if hostel.name == "Swaraj":
+    if hostel.name == "Swaraj" or hostel.name == "Sahara":
         for messcut in messcuts:
             days = (messcut.end_date - messcut.start_date).days + 1
             if days == 2:
