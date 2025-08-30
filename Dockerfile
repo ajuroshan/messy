@@ -16,8 +16,7 @@ RUN pip install --upgrade pip setuptools wheel setuptools-scm
 # RUN python -m pip install --user virtualenv
 
 # Install dependencies
-RUN pip install -r requirements.txt
-
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # # Expose the port on which Gunicorn will run
 EXPOSE 8000
