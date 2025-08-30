@@ -159,6 +159,7 @@ def download_mess_bill_admin(request):
 @staff_member_required
 def messcut_details_admin(request):
 	today = date.today()
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
 	if request.method == 'POST':
 		try:
 			today = dt.strptime(request.POST.get('date'), '%Y-%m-%d').date()
@@ -166,13 +167,14 @@ def messcut_details_admin(request):
 			return HttpResponse('Invalid date format')
 
 	context = {}
-	messcuts = Messcut.objects.filter(start_date__month=today.month)
-	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today)
+	messcuts = Messcut.objects.filter(start_date__month=today.month,hostel=hostel)
+	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today,hostel=hostel)
 
 	# Get all applications that have a mess cut today
 	today_messcut_applications = Application.objects.filter(
 		messcuts__start_date__lte=today,
-		messcuts__end_date__gte=today
+		messcuts__end_date__gte=today,
+		messcuts__hostel=hostel,
 	).distinct()
 
 	# Prepare a list of tuples (application, messcut) for applications with today's mess cut
@@ -182,7 +184,7 @@ def messcut_details_admin(request):
 		for messcut in application.messcuts.filter(start_date__lte=today, end_date__gte=today):
 			applications_with_messcuts_today.append((application, messcut))
 
-	total_students = Application.objects.filter(accepted=True).count()
+	total_students = Application.objects.filter(accepted=True,hostel=hostel).count()
 	estimated_food = total_students - today_messcut_applications.count()
 	application_count = today_messcut_applications.count()
 
