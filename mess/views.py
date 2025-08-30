@@ -237,14 +237,15 @@ def dashboard(request):
 @login_required
 def view_mess_bill(request):
 	try:
-		# Assume there is only one Messsettings instance
-		messsettings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return redirect('some_error_page')
 	application = Application.objects.filter(applicant=request.user).first()
 	mess_bill = application.mess_bill.filter(month__month=messsettings.month_for_bill_calculation.month).last()
-	details = Messsettings.objects.first()
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+	details = Messsettings.objects.filter(hostel=hostel).first()
 
 	return render(request, 'mess/view_mess_bill.html',
 	              {'mess_bill': mess_bill, "application": application, "details": details})

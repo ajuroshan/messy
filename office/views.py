@@ -260,7 +260,8 @@ def attendance_cut_details_admin(request):
 
 def calculate_mess_bill():
 	# Fetch Messsettings only once
-	messsettings = Messsettings.objects.first()
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+	messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	if not messsettings:
 		raise ValueError("Messsettings instance is required to calculate mess bills.")
 
@@ -313,7 +314,8 @@ def calculate_mess_bill():
 def send_mess_bill_mail_admin(request):
 	try:
 		# Assume there is only one Messsettings instance
-		messsettings = Messsettings.objects.first()
+		hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+		messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	except Messsettings.DoesNotExist:
 		# Handle case where no Messsettings instance exists
 		return HttpResponse('Error: Messsettings instance not found')
