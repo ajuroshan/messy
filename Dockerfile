@@ -16,6 +16,7 @@ RUN pip install --upgrade pip setuptools wheel setuptools-scm
 # RUN python -m pip install --user virtualenv
 
 # Install dependencies
+RUN apt-get update && apt-get install -y mercurial
 RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # # Expose the port on which Gunicorn will run
