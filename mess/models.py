@@ -102,6 +102,7 @@ class MessBill(models.Model):
 	screenshot = models.ImageField(upload_to='payment_screenshots', blank=True, null=True)
 	fine_paid = models.IntegerField(default=0)
 	amount_paid = models.IntegerField(default=0)
+	hostel = models.ForeignKey('application.Hostel', on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
 		return f"{self.amount}"

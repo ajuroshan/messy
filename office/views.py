@@ -26,6 +26,8 @@ from django.utils.html import strip_tags
 from django.template import loader
 from django.conf import settings
 
+from mess.views import calculate_total_messcut_days
+
 
 # Create your views here.
 
@@ -66,7 +68,7 @@ def mess_bill_admin(request):
 		form = MesssettingsForm(request.POST, request.FILES, instance=messsettings)
 		if form.is_valid():
 			form.save()
-			calculate_mess_bill()
+			calculate_mess_bill(hostel)
 			return redirect('view_mess_bill_admin')
 		else:
 			print(form.errors)
@@ -263,9 +265,7 @@ def attendance_cut_details_admin(request):
 	return render(request, 'admin/attendance_cut_details.html', context)
 
 
-def calculate_mess_bill():
-	# Fetch Messsettings only once
-	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
+def calculate_mess_bill(hostel):
 	messsettings = Messsettings.objects.filter(hostel=hostel).first()
 	if not messsettings:
 		raise ValueError("Messsettings instance is required to calculate mess bills.")
@@ -278,17 +278,17 @@ def calculate_mess_bill():
 	OTHER_CHARGES = messsettings.other_charges
 	FEAST_CHARGES = messsettings.feast_charges
 	MESS_CLOSED_DATES = [date.date for date in messsettings.mess_closed_dates.all()]
-	# vecation 12 to 22 sept
 
-	mess_bills = MessBill.objects.filter(month__month=BILL_DATE.month)
+	mess_bills = MessBill.objects.filter(month__month=BILL_DATE.month,hostel=hostel)
 	if mess_bills.exists():
 		mess_bills.delete()
 
 	# Iterate through accepted applications
-	for application in Application.objects.filter(accepted=True, claim=False):
+	for application in Application.objects.filter(accepted=True, claim=False,hostel=hostel):
 		# Calculate total messcut days for the given month
 		messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
-		total_messcut_days = sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts)
+
+		total_messcut_days = calculate_total_messcut_days(messcuts,hostel)
 		effective_messcut_days = total_messcut_days
 
 		for date in MESS_CLOSED_DATES:
@@ -311,7 +311,8 @@ def calculate_mess_bill():
 			feast_charges=FEAST_CHARGES,
 			total_days=TOTAL_DAYS,
 			mess_cuts=total_messcut_days,
-			effective_mess_cuts=effective_messcut_days
+			effective_mess_cuts=effective_messcut_days,
+			hostel=hostel,
 		)
 		application.save()
 
