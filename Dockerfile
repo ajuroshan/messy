@@ -12,12 +12,11 @@ WORKDIR /code
 
 # Copy the project code into the container
 COPY . /code/
-RUN pip install --upgrade setuptools
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip setuptools wheel setuptools-scm
 # RUN python -m pip install --user virtualenv
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 
 # # Expose the port on which Gunicorn will run
