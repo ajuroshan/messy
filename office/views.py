@@ -203,6 +203,7 @@ def messcut_details_admin(request):
 @staff_member_required
 def attendance_cut_details_admin(request):
 	today = date.today()
+	hostel = Application.objects.filter(applicant=request.user, accepted=True).first().hostel
 
 	if request.method == 'POST':
 		try:
@@ -211,13 +212,14 @@ def attendance_cut_details_admin(request):
 			return HttpResponse('Invalid date format')
 
 	# Get all accepted applications
-	applications = Application.objects.filter(accepted=True)
+	applications = Application.objects.filter(accepted=True,hostel=hostel)
 
 	# Get today's attendance records and extract student IDs
 	attendance_today = MessAttendance.objects.filter(
 		timestamp__year=today.year,
 		timestamp__month=today.month,
-		timestamp__day=today.day
+		timestamp__day=today.day,
+		hostel=hostel,
 	)
 
 	# Extract student IDs who attended each meal
@@ -226,12 +228,13 @@ def attendance_cut_details_admin(request):
 	dinner_attended_students = attendance_today.filter(meal='dinner').values_list('student', flat=True)
 
 	# Get all mess cuts valid today
-	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today)
+	messcuts_today = Messcut.objects.filter(start_date__lte=today, end_date__gte=today,hostel=hostel)
 
 	# Get all applications with mess cuts valid today
 	applications_with_messcut = Application.objects.filter(
 		messcuts__start_date__lte=today,
-		messcuts__end_date__gte=today
+		messcuts__end_date__gte=today,
+		hostel=hostel,
 	).distinct()
 
 	# Exclude applications with a mess cut today
