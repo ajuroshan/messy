@@ -42,7 +42,7 @@ class MesssettingsAdmin(admin.ModelAdmin):
 	list_per_page = 10
 
 	def display_name(self, obj):
-		return "Messsettings"
+		return f"MessSettings of {obj.hostel}"
 	display_name.short_description = "Name"
 
 

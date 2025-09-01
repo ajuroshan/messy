@@ -162,7 +162,7 @@ class Messsettings(models.Model):
 	hostel = models.OneToOneField('application.Hostel', on_delete=models.CASCADE)
 
 	def __str__(self):
-		return f"{self.total_days} days, {self.amount_per_day} per day"
+		return f"MessSettings of {self.hostel}"
 
 
 
