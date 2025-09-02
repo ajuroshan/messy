@@ -1,9 +1,11 @@
 from datetime import date
 
+
 # Hostel class should inherit from object, and __init__ should be defined properly
 class Hostel:
     def __init__(self):
         self.name = ""
+
 
 # Create hostel instances
 h1 = Hostel()
@@ -12,11 +14,13 @@ h1.name = "Swaraj"
 h2 = Hostel()
 h2.name = "Sagar"
 
+
 # Messcut class with proper __init__ method
 class Messcut:
     def __init__(self, start_date, end_date):
         self.start_date = start_date
         self.end_date = end_date
+
 
 # Function to calculate messcut days based on conditions
 def calculate_total_messcut_days(messcuts, hostel):
@@ -32,7 +36,10 @@ def calculate_total_messcut_days(messcuts, hostel):
                 total_days += days
         return total_days
     else:
-        return sum((messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts )
+        return sum(
+            (messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts
+        )
+
 
 # ----- Test -----
 
@@ -49,4 +56,6 @@ total = calculate_total_messcut_days(messcuts, h1)
 print("Total messcut days for", h1.name, "=", total)
 
 # If you test for h2 (Sagar), it will return 0
-print("Total messcut days for", h2.name, "=", calculate_total_messcut_days(messcuts, h2))
+print(
+    "Total messcut days for", h2.name, "=", calculate_total_messcut_days(messcuts, h2)
+)

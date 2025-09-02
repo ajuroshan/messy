@@ -8,110 +8,116 @@ from django.core.files import File
 # Create your models here.
 
 hostels = [
-	('Sagar', 'Sagar'),
-
+    ("Sagar", "Sagar"),
 ]
 
 food_preferences = [
-	('veg', 'Veg'),
-	('nonveg', 'Non-Veg'),
+    ("veg", "Veg"),
+    ("nonveg", "Non-Veg"),
 ]
 
 semester_choices = [
-	('S1', 'S1'),
-	('S2', 'S2'),
-	('S3', 'S3'),
-	('S4', 'S4'),
-	('S5', 'S5'),
-	('S6', 'S6'),
-	('S7', 'S7'),
-	('S8', 'S8'),
+    ("S1", "S1"),
+    ("S2", "S2"),
+    ("S3", "S3"),
+    ("S4", "S4"),
+    ("S5", "S5"),
+    ("S6", "S6"),
+    ("S7", "S7"),
+    ("S8", "S8"),
 ]
 
 
 class Application(models.Model):
-	applicant = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='applications')
-	first_name = models.CharField(max_length=100)
-	last_name = models.CharField(max_length=100, blank=True, null=True)
-	mess_no = models.CharField(max_length=100, blank=True, null=True)
-	hostel = models.ForeignKey('application.Hostel', on_delete=models.CASCADE)
-	accepted = models.BooleanField(default=False)
-	created_at = models.DateTimeField(auto_now_add=True)
-	messcuts = models.ManyToManyField(Messcut, blank=True,related_name='application')
-	department = models.ForeignKey('application.Department', on_delete=models.CASCADE)
-	semester = models.CharField(max_length=100, choices=semester_choices, default='')
-	outmess = models.BooleanField(default=False)
-	food_preference = models.CharField(max_length=100, choices=food_preferences, default='nonveg')
-	claim = models.BooleanField(default=False)
-	qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
-	attendance = models.ManyToManyField(MessAttendance, blank=True)
-	mess_bill = models.ManyToManyField(MessBill, blank=True,related_name='application')
-	profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-	student_id = models.CharField(max_length=100)
-	phone_number = models.CharField(max_length=100)
-	mess_no_number = models.IntegerField(default=0)
+    applicant = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE, related_name="applications"
+    )
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
+    mess_no = models.CharField(max_length=100, blank=True, null=True)
+    hostel = models.ForeignKey("application.Hostel", on_delete=models.CASCADE)
+    accepted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    messcuts = models.ManyToManyField(Messcut, blank=True, related_name="application")
+    department = models.ForeignKey("application.Department", on_delete=models.CASCADE)
+    semester = models.CharField(max_length=100, choices=semester_choices, default="")
+    outmess = models.BooleanField(default=False)
+    food_preference = models.CharField(
+        max_length=100, choices=food_preferences, default="nonveg"
+    )
+    claim = models.BooleanField(default=False)
+    qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
+    attendance = models.ManyToManyField(MessAttendance, blank=True)
+    mess_bill = models.ManyToManyField(MessBill, blank=True, related_name="application")
+    profile_pic = models.ImageField(upload_to="profile_pics/", blank=True, null=True)
+    student_id = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=100)
+    mess_no_number = models.IntegerField(default=0)
 
+    official_outmess = models.BooleanField(default=False)
 
-	official_outmess = models.BooleanField(default=False)
+    def __str__(self):
+        return str(self.applicant.username + " - " + str(self.mess_no))
 
-	def __str__(self):
-		return str(self.applicant.username + ' - ' + str(self.mess_no))
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            hostel_code = self.hostel.code
 
-	def save(self, *args, **kwargs):
-		if not self.pk:
-			hostel_code = self.hostel.code
+            last_application = (
+                Application.objects.filter(hostel=self.hostel)
+                .order_by("-mess_no_number")
+                .first()
+            )
 
-			last_application = Application.objects.filter(
-				hostel=self.hostel
-			).order_by('-mess_no_number').first()
+            next_num = (last_application.mess_no_number if last_application else 0) + 1
 
-			next_num = (last_application.mess_no_number if last_application else 0) + 1
+            self.mess_no_number = next_num
+            self.mess_no = f"{hostel_code}-{next_num}"
 
-			self.mess_no_number = next_num
-			self.mess_no = f"{hostel_code}-{next_num}"
+            # Generate QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(self.mess_no)  # Use the formatted mess_no
+            qr.make(fit=True)
 
-			# Generate QR code
-			qr = qrcode.QRCode(
-				version=1,
-				error_correction=qrcode.constants.ERROR_CORRECT_L,
-				box_size=10,
-				border=4,
-			)
-			qr.add_data(self.mess_no)  # Use the formatted mess_no
-			qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            img_io = BytesIO()
+            img.save(img_io, format="PNG")
+            img_file = File(img_io, name=f"{self.mess_no}.png")
 
-			img = qr.make_image(fill_color='black', back_color='white')
-			img_io = BytesIO()
-			img.save(img_io, format='PNG')
-			img_file = File(img_io, name=f'{self.mess_no}.png')
+            self.qr_code.save(f"{self.mess_no}.png", img_file, save=False)
 
-			self.qr_code.save(f'{self.mess_no}.png', img_file, save=False)
-
-		super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class AcceptedApplication(Application):
-	class Meta:
-		proxy = True
+    class Meta:
+        proxy = True
 
 
 class Profile(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE)
-	profile_pic = models.URLField(max_length=200, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic = models.URLField(max_length=200, blank=True, null=True)
 
 
 class Hostel(models.Model):
-	name = models.CharField(max_length=100)
-	mess_sec = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='hostels')
-	code = models.CharField(max_length=10)
-	assistant_mess_sec = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    mess_sec = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE, related_name="hostels"
+    )
+    code = models.CharField(max_length=10)
+    assistant_mess_sec = models.CharField(max_length=100, blank=True, null=True)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
 
 
 class Department(models.Model):
-	name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
