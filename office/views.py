@@ -163,6 +163,9 @@ def download_mess_bill_admin(request):
             "Name",
             "Department",
             "Semester",
+            "Outmess",
+            "Official Outmess",
+            "Claim",
             "Total Days",
             "Effective Days",
             "Amount Per Day",
@@ -197,6 +200,9 @@ def download_mess_bill_admin(request):
                     if application.department
                     else application.department,  # Department
                     application.semester,  # Semester
+                    "Yes" if application.outmess else "No",
+                    "Yes" if application.official_outmess else "No",
+                    "Yes" if application.claim else "No",
                     bill.total_days,  # Total Days
                     bill.effective_days,  # Effective Days
                     bill.amount_per_day,  # Amount Per Day
@@ -363,7 +369,7 @@ def calculate_mess_bill(hostel):
 
     # Iterate through accepted applications
     for application in Application.objects.filter(
-        accepted=True, claim=False, hostel=hostel
+        accepted=True, hostel=hostel
     ):
         # Calculate total messcut days for the given month
         messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
