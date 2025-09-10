@@ -207,6 +207,7 @@ def mark_attendance(request):
 
         meal_attendance = MessAttendance.objects.filter(
             meal=meal,
+            hostel=hostel,
             timestamp__day=datetime.today().day,
             timestamp__month=datetime.today().month,
             timestamp__year=datetime.today().year,
