@@ -32,6 +32,8 @@ class ApplicationAdmin(admin.ModelAdmin):
         "created_at",
         "outmess",
         "official_outmess",
+        "department",
+        "semester",
     ]
     search_fields = [
         "applicant__first_name",
@@ -185,6 +187,8 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
         "created_at",
         "outmess",
         "official_outmess",
+        "department",
+        "semester",
     ]
     search_fields = [
         "applicant__first_name",
