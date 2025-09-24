@@ -3,343 +3,177 @@
 {% block title %}Scan QR{% endblock %}
 
 {% block content %}
-    {% if not mealtime %}
+{% if not mealtime %}
+    <div class="alert alert-danger text-center my-4">
+        <h6>It's not Mess time. Please come back during Mess time.</h6>
+    </div>
+{% else %}
+<div class="container">
+    <!-- Audio feedback -->
+    <audio id="clickAudio" src="{% static 'audio/polayadi-mone.wav' %}" type="audio/wav"></audio>
 
-        <div class="alert alert-danger text-center my-4">
-            <h6>It's not Mess time. Please come back during Mess time.</h6>
-        </div>
+    <h6 class="text-center my-4 text-muted">Scan QR Code to Mark Attendance</h6>
+    <div id="finalMessage"></div>
 
-    {% else %}
-        <div class="container">
-            <audio controls>
-                <source src="{% static 'audio/click.wav' %}" type="audio/wav">
-                Your browser does not support the audio element.
-            </audio>
-            <h6 class="text-center my-4 text-muted">Scan QR Code to Mark Attendance</h6>
-            <div class="d-flex justify-content-center mb-4">
-                <div id="qr-reader" style="width:100%"></div>
+
+    <!-- QR Scanner -->
+    <div class="d-flex justify-content-center mb-4">
+        <div id="qr-reader" style="width:100%"></div>
+    </div>
+    <div id="qr-reader-results" class="text-center mb-4"></div>
+
+    <!-- Attendance info -->
+    <h6 class="my-2 text-center text-muted">
+        Attendance: <span class="badge bg-danger" id="attendance_count"></span>
+    </h6>
+    <h6 class="my-2 text-muted">Recent Entry</h6>
+    <div id="pastMessnos">
+        <span class="badge bg-success" id="past_mess_nos"></span>
+    </div>
+
+    <!-- Manual entry form -->
+    <form id="qr-form" class="text-center">
+        {% csrf_token %}
+        <input type="hidden" name="qr_code_data" id="qr_code_data">
+        <input type="number" name="mess_no" placeholder="Enter Mess No" class="form-control my-3 w-100">
+        <button type="button" id="manual_mess_no_submit" class="btn btn-primary w-100">Enter</button>
+    </form>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Attendance</h5>
             </div>
-            <div id="qr-reader-results" class="text-center mb-4"></div>
-            <h6 class="my-2 text-center text-muted">Attendance : <span class="badge bg-danger"
-                                                                       id="attendance_count"></span></h6>
-            <h6 class="my-2 text-muted">Recent Entry</h6>
-            <div id="pastMessnos">
-                <span class="badge bg-success" id="past_mess_nos"></span>
+            <div class="modal-body text-center">
+                <img id="profilePic" class="img-fluid rounded-circle mx-auto mb-3" 
+     style="width: 150px; height: 150px; object-fit: cover;" hidden>
+
+                <h5 id="modelHeading" hidden></h5>
+                <h6 id="modelText" class="text-muted" hidden></h6>
+                <h6 id="modalMessage" class="alert alert-success" hidden></h6>
+                <h6 id="modalMessageMesscut" class="alert alert-danger" hidden></h6>
             </div>
-
-            <form id="qr-form" class="text-center">
-                {% csrf_token %}
-                <input type="hidden" name="qr_code_data" id="qr_code_data">
-                <input type="number" name="mess_no" placeholder="Enter Mess No" class="form-control my-3 mx-0 w-100">
-                <button type="button" id="manual_mess_no_submit" class="btn btn-primary w-100">Enter
-                </button>
-                <div class="" id="finalMessage"></div>
-            </form>
-        </div>
-
-        <!-- Confirmation Modal -->
-        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true"
-             data-bs-backdrop="false">
-            <div class="modal-dialog ">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmModalLabel">Confirm Attendance</h5>
-                    </div>
-
-
-                    <div class="modal-body " id="modalBody">
-                        <h5 class="my-2" id="modelHeading"></h5>
-                        <h6 class="text-muted text-center" id="modelText"></h6>
-                        <h5 class="text-center" id="modelHeading"></h5>
-                        <h6 class="alert alert-success text-center" id="modalMessage"></h6>
-                        <h6 class="alert alert-danger text-center" id="modalMessageMesscut"></h6>
-                    </div>
-                    <div class="modal-footer">
-                        {#                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>#}
-                        <button type="button" class="btn btn-success w-100" id="confirmSubmit">Confirm</button>
-                    </div>
-                </div>
+            <div class="modal-footer d-flex">
+                <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success w-100" id="confirmSubmit">Confirm</button>
             </div>
         </div>
+    </div>
+</div>
 
-        <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
+<!-- Scripts -->
+<script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+const profilePic = document.getElementById("profilePic");
+const modelHeading = document.getElementById('modelHeading');
+const modelText = document.getElementById('modelText');
+const modalMessage = document.getElementById('modalMessage');
+const modalMessageMesscut = document.getElementById('modalMessageMesscut');
+const pastMessNos = document.getElementById('past_mess_nos');
+const attendanceCount = document.getElementById('attendance_count');
+const finalMessage = document.getElementById('finalMessage');
+const confirmButton = document.getElementById('confirmSubmit');
+const qrCodeInput = document.getElementById('qr_code_data');
+const form = document.getElementById('qr-form');
+const modal = new bootstrap.Modal(document.getElementById('confirmModal'), { backdrop: false });
+const clickAudio = document.getElementById('clickAudio');
 
-            let html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", {fps: 5, qrbox: 250});
-            html5QrcodeScanner.render(onScanSuccess, onScanError);
+let lastQrMessage = null;
 
-            let lastQrMessage = null; // Variable to store the last processed QR code
+/** Reset modal fields visibility */
+function resetModal() {
+    [modelHeading, modelText, modalMessage, modalMessageMesscut, profilePic].forEach(el => el.hidden = true);
+    finalMessage.textContent = '';
+    finalMessage.className = '';
+}
 
-            function onScanSuccess(qrMessage) {
-                // Compare the current QR code with the last processed one
-                if (qrMessage === lastQrMessage) {
-                    console.log("QR code already processed.");
-                    return; // Exit the function to prevent reprocessing
-                }
-                let audio = new Audio("{% static 'audio/click.wav' %}");
-                audio.play();
+/** Update modal content from API response */
+function updateModal(data) {
+    resetModal();
+    if (data.app_details) {
+        profilePic.src = data.app_details.image;
+        profilePic.hidden = false;
+        modelHeading.textContent = `${data.app_details.full_name} ${data.app_details.dept}`;
+        modelHeading.hidden = false;
+        modelText.textContent = `${data.app_details.mess_no}`;
+        modelText.hidden = false;
+    }
+    if (data.message && !data.already_marked) {
+        modalMessage.textContent = data.message;
+        modalMessage.hidden = false;
+    }
+    if (data.messcut) {
+        modalMessageMesscut.textContent = data.messcut;
+        modalMessageMesscut.hidden = false;
+    }
+    if (data.already_marked) {
+        modalMessageMesscut.textContent = data.message;
+        modalMessageMesscut.hidden = false;
+    }
+    modal.show();
+}
 
-                lastQrMessage = qrMessage; // Update the last processed QR code
+/** Submit attendance */
+async function submitAttendance(formData, confirm=false) {
+    if (confirm) formData.append('confirm', 'true');
+    try {
+        const response = await fetch("{% url 'mark_attendance' %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+        });
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+        return { status: 'error', message: 'An error occurred. Please try again.' };
+    }
+}
 
-                const modalBody = document.getElementById('modalBody');
-                const modelHeading = document.getElementById('modelHeading');
-                const modelText = document.getElementById('modelText');
-                const modalMessage = document.getElementById('modalMessage');
-                const modalMessageMesscut = document.getElementById('modalMessageMesscut');
+/** Handle confirm button click */
+async function handleConfirm(formData) {
+    const data = await submitAttendance(formData, true);
+    pastMessNos.textContent = formData.get('qr_code_data') || formData.get('mess_no');
+    pastMessNos.className = 'badge bg-success mx-1';
+    attendanceCount.textContent = data.meal_attendance || '0';
+    finalMessage.textContent = data.message;
+    finalMessage.className = data.status === 'success' ? 'alert alert-success my-4' : 'alert alert-danger my-4';
+    modal.hide();
+    form.reset();
+    qrCodeInput.value = '';
+}
 
-                // Show or hide elements as needed
-                modelHeading.className = 'text-center';
-                modelText.className = 'text-muted text-center';
-                modalMessage.className = 'alert alert-success text-center';
-                modalMessageMesscut.className = 'alert alert-danger text-center';
+/** QR scan success */
+async function onScanSuccess(qrMessage) {
+    if (qrMessage === lastQrMessage) return;
+    lastQrMessage = qrMessage;
+    clickAudio.play();
+    qrCodeInput.value = qrMessage;
+    const formData = new FormData(form);
+    const data = await submitAttendance(formData);
+    updateModal(data);
+    confirmButton.onclick = () => handleConfirm(formData);
+}
 
-                // Clear previous content or hide elements
-                modelHeading.hidden = true;
-                modelText.hidden = true;
-                modalMessage.hidden = true;
-                modalMessageMesscut.hidden = true;
+/** QR scan error */
+function onScanError(err) { console.error(err); }
 
-                document.getElementById('qr_code_data').value = qrMessage;
-                console.log(qrMessage);
+/** Manual submit */
+document.getElementById('manual_mess_no_submit').addEventListener('click', async () => {
+    const formData = new FormData(form);
+    const data = await submitAttendance(formData);
+    updateModal(data);
+    confirmButton.onclick = () => handleConfirm(formData);
+});
 
-                // Prepare the form data for submission
-                const form = document.getElementById('qr-form');
-                const formData = new FormData(form);
+// Initialize QR Scanner
+const html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 5, qrbox: 250 });
+html5QrcodeScanner.render(onScanSuccess, onScanError);
+</script>
 
-                // Fetch data to display in the modal
-                fetch("{% url 'mark_attendance' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        if (data.app_details && Object.keys(data.app_details).length > 0) {
-                            modelHeading.textContent = `${data.app_details.full_name} ${data.app_details.dept}`;
-                            modelText.textContent = `${data.app_details.mess_no}`;
-                            modelHeading.hidden = false;
-                            modelText.hidden = false;
-                        }
-
-                        modalMessage.textContent = data.message;
-                        modalMessage.hidden = false;
-
-                        if (data.messcut && Object.keys(data.messcut).length > 0) {
-                            modalMessageMesscut.textContent = `${data.messcut}`;
-                            modalMessageMesscut.hidden = false;
-                        } else {
-                            modalMessageMesscut.hidden = true;
-                        }
-
-                        // Show the modal
-                        const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                            backdrop: false
-                        });
-                        modal.show();
-
-                        // Handle the confirmation button click
-                        const confirmButton = document.getElementById('confirmSubmit');
-                        const handleConfirmClick = function () {
-                            formData.append('confirm', 'true');  // Append confirmation flag to form data
-                            const past_mess_nos = document.getElementById('past_mess_nos');
-                            past_mess_nos.className = 'badge bg-success mx-1';
-                            const attendance_count = document.getElementById('attendance_count');
-                            attendance_count.className = 'badge bg-danger';
-                            const finalMessage = document.getElementById('finalMessage');
-
-                            fetch("{% url 'mark_attendance' %}", {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                                }
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-
-                                    console.log(data);
-                                    if (data.status === 'success') {
-                                        console.log(data);
-                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
-                                        past_mess_nos.textContent = formData.get('qr_code_data');
-                                        attendance_count.textContent = `${data.meal_attendance}`;
-                                        finalMessage.textContent = `${data.message}`;
-                                        finalMessage.className = 'alert alert-success my-4';
-                                        form.reset();
-                                        modal.hide();
-                                    } else {
-                                        console.log(data.message); // You might want to use a more elegant notification
-                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
-                                        past_mess_nos.textContent = formData.get('qr_code_data');
-                                        attendance_count.textContent = `${data.meal_attendance}`;
-                                        finalMessage.textContent = `${data.message}`;
-                                        finalMessage.className = 'alert alert-danger my-4';
-                                        form.reset();
-                                        modal.hide();
-                                    }
-
-                                    document.getElementById('qr_code_data').value = '';
-                                    confirmButton.removeEventListener('click', handleConfirmClick); // Remove listener after execution
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    console.log('An error occurred. Please try again.');
-                                });
-                        };
-
-                        confirmButton.addEventListener('click', handleConfirmClick);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        modalBody.textContent = 'An error occurred. Please try again.';
-                        const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                            backdrop: false
-                        });
-                        modal.show();
-                    });
-            }
-
-
-            document.getElementById('manual_mess_no_submit').addEventListener('click', function () {
-                const form = document.getElementById('qr-form');
-                const formData = new FormData(form);
-
-                // Fetch data to display in the modal
-                fetch("{% url 'mark_attendance' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-
-                        // Get existing elements
-                        const modelHeading = document.getElementById('modelHeading');
-                        const modelText = document.getElementById('modelText');
-                        const modalMessage = document.getElementById('modalMessage');
-                        const modalMessageMesscut = document.getElementById('modalMessageMesscut');
-
-
-                        // Show or hide elements as needed
-                        modelHeading.className = 'text-center';
-                        modelText.className = 'text-muted text-center';
-                        modalMessage.className = 'alert alert-success text-center';
-                        modalMessageMesscut.className = 'alert alert-danger text-center';
-
-                        // Clear previous content or hide elements
-                        modelHeading.hidden = true;
-                        modelText.hidden = true;
-                        modalMessage.hidden = true;
-                        modalMessageMesscut.hidden = true;
-
-                        // Update elements based on the response data
-                        if (data.app_details && Object.keys(data.app_details).length > 0) {
-                            modelHeading.textContent = `${data.app_details.full_name} ${data.app_details.dept}`;
-                            modelText.textContent = `${data.app_details.mess_no}`;
-                            modelHeading.hidden = false;
-                            modelText.hidden = false;
-                        } else {
-                            modelHeading.hidden = true;
-                            modelText.hidden = true;
-                        }
-
-                        modalMessage.textContent = `${data.message}`;
-                        modalMessage.hidden = false;
-
-                        if (data.messcut && Object.keys(data.messcut).length > 0) {
-                            modalMessageMesscut.textContent = `${data.messcut}`;
-                            modalMessageMesscut.hidden = false;
-                        } else {
-                            modalMessageMesscut.hidden = true;
-                        }
-
-                        // Show the modal
-                        const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                            backdrop: false
-                        });
-                        modal.show();
-
-                        // Handle the confirmation button click
-                        const confirmButton = document.getElementById('confirmSubmit');
-                        const handleConfirmClick = function () {
-                            formData.append('confirm', 'true');  // Append confirmation flag to form data
-                            const past_mess_nos = document.getElementById('past_mess_nos');
-                            past_mess_nos.className = 'badge bg-success mx-1';
-                            const attendance_count = document.getElementById('attendance_count');
-                            attendance_count.className = 'badge bg-danger';
-                            const finalMessage = document.getElementById('finalMessage');
-
-
-                            fetch("{% url 'mark_attendance' %}", {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                                }
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.status === 'success') {
-                                        console.log(data.message);
-                                        {#past_mess_nos.textContent = `${data.app_details.mess_no}`;#}
-                                        past_mess_nos.textContent = formData.get('mess_no');
-                                        attendance_count.textContent = `${data.meal_attendance}`;
-                                        finalMessage.textContent = `${data.message}`;
-                                        finalMessage.className = 'alert alert-success my-4';
-                                        modal.hide();
-                                        form.reset();
-                                    } else {
-                                        console.log(data.message); // You might want to use a more elegant notification
-                                        past_mess_nos.textContent = formData.get('mess_no');
-                                        attendance_count.textContent = `${data.meal_attendance}`;
-                                        finalMessage.textContent = `${data.message}`;
-                                        finalMessage.className = 'alert alert-danger my-4';
-
-                                        modal.hide();
-                                        form.reset();
-                                    }
-                                    document.getElementById('qr_code_data').value = '';
-                                    confirmButton.removeEventListener('click', handleConfirmClick); // Remove listener after execution
-
-
-                                    // Reset visibility of elements
-                                    modelHeading.hidden = true;
-                                    modelText.hidden = true;
-                                    modalMessage.hidden = true;
-                                    modalMessageMesscut.hidden = true;
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    console.log('An error occurred. Please try again.');
-                                });
-                        };
-                        confirmButton.addEventListener('click', handleConfirmClick);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        const modalBody = document.getElementById('modalBody');
-                        modalBody.textContent = 'An error occurred. Please try again.';
-                        const modal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                            backdrop: false
-                        });
-                        modal.show();
-                    });
-            });
-
-            function onScanError(errorMessage) {
-                console.error(errorMessage);
-                // handle scan error
-            }
-
-        </script>
-
-    {% endif %}
+{% endif %}
 {% endblock %}

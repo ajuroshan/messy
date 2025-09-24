@@ -4,6 +4,8 @@ import smtplib
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import loader
 from django.utils.html import strip_tags
+from django.core.exceptions import ValidationError
+
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -252,6 +254,7 @@ def mark_attendance(request):
             app_details = {
                 "full_name": f"{application.applicant.first_name + ' ' + application.applicant.last_name}",
                 "dept": str(application.department).upper(),
+                "image": application.profile_pic.url if application.profile_pic.url else None,
                 "mess_no": application.mess_no,
             }
             messcuts = application.messcuts.filter(
@@ -270,14 +273,18 @@ def mark_attendance(request):
                         status=400,
                     )
 
-            if confirm:
-                try:
-                    attendance = MessAttendance.objects.create(
-                        student=application,
-                        meal=meal,
-                        timestamp=timezone.now(),
-                        hostel=application.hostel,
-                    )
+            try:
+                attendance = MessAttendance(
+                    student=application,
+                    meal=meal,
+                    timestamp=timezone.now(),
+                    hostel=application.hostel,
+                    date=timezone.localdate(),
+                )
+                attendance.full_clean()   # Validate the attendance instance
+
+                if confirm:
+                    attendance.save()
                     meal_attendance = MessAttendance.objects.filter(
                         meal=meal,
                         hostel=application.hostel,
@@ -294,23 +301,24 @@ def mark_attendance(request):
                         },
                         status=200,
                     )
-                except Exception as e:
-                    return JsonResponse(
-                        {
-                            "status": "error",
-                            "message": f"Attendance already marked for {app_details['mess_no']}",
-                            "app_details": app_details,
-                            "meal_attendance": meal_attendance,
-                        },
-                        status=400,
-                    )
-            else:
+
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "message": f"Application Details",
+                        "app_details": app_details,
+                        "meal_attendance": meal_attendance,
+                    },
+                    status=200,
+                )
+            except Exception as e:
                 return JsonResponse(
                     {
                         "status": "error",
-                        "message": "Please confirm to mark attendance.",
+                        "message": f"Attendance already marked for {app_details['mess_no']}",
                         "app_details": app_details,
                         "meal_attendance": meal_attendance,
+                        "already_marked": True
                     },
                     status=400,
                 )
