@@ -305,7 +305,7 @@ def mark_attendance(request):
                 return JsonResponse(
                     {
                         "status": "success",
-                        "message": f"Application Details",
+                        "message": f"Click Confirm to Mark Attendance.",
                         "app_details": app_details,
                         "meal_attendance": meal_attendance,
                     },
