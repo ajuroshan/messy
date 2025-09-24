@@ -62,6 +62,7 @@ class MesscutForm(forms.ModelForm):
         cleaned_data = super().clean()
         start_date = cleaned_data.get("start_date")
         end_date = cleaned_data.get("end_date")
+        hostel_code = Application.objects.filter(applicant=self.request.user, accepted=True).first().hostel.code
 
         # Calculate the total days for the current mess cut
 
