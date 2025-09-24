@@ -164,6 +164,7 @@ function onScanError(err) { console.error(err); }
 
 /** Manual submit */
 document.getElementById('manual_mess_no_submit').addEventListener('click', async () => {
+    qrCodeInput.value = '';
     const formData = new FormData(form);
     const data = await submitAttendance(formData);
     updateModal(data);
