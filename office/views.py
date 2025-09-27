@@ -499,22 +499,26 @@ def individual_messcut(request):
     if request.method == "POST":
         mess_no = request.POST.get("mess_no")
         date_of_attendance = request.POST.get("date_of_attendance")
+        hostel = (
+            Application.objects.filter(applicant=request.user, accepted=True)
+            .first()
+            .hostel
+        )
+        mess_no = f"{hostel.code}-{mess_no}"
 
         if date_of_attendance:
             year_of_attendance = int(date_of_attendance.split("-")[0])
             month_of_attendance = int(date_of_attendance.split("-")[1])
 
             # Get the hostel of the logged-in user's accepted application
-            application = Application.objects.filter(applicant=request.user, accepted=True).first()
+            application = Application.objects.filter(mess_no__exact=mess_no, hostel=hostel).first()
             if application and application.hostel:
-                hostel = application.hostel
-                mess_no = f"{hostel.code}-{mess_no}"
-                print(mess_no)
 
                 # Filter messcuts for that year+month
                 messcuts = application.messcuts.filter(
                     start_date__year=year_of_attendance,
                     start_date__month=month_of_attendance,
+                    hostel=application.hostel,
                 )
 
                 total_messcut_days = calculate_total_messcut_days(messcuts, hostel)
