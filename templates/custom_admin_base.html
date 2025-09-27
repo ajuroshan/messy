@@ -51,6 +51,10 @@
                 <a class="nav-link {% if request.path == '/office/individual_attendance/' %}active{% endif %}"
                    href="{% url 'individual_attendance' %}">Individual Attendance</a>
             </li>
+                        <li class="nav-item">
+                <a class="nav-link {% if request.path == '/office/individual_messcut/' %}active{% endif %}"
+                   href="{% url 'individual_messcut' %}">Individual MessCuts</a>
+            </li>
         </ul>
     {% endif %}
 </header>

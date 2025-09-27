@@ -27,4 +27,5 @@ urlpatterns = [
         name="attendance_cut_details_admin",
     ),
     path("individual_attendance/", individual_attendance, name="individual_attendance"),
+    path("individual_messcut/", individual_messcut, name="individual_messcut"),
 ]
