@@ -30,12 +30,15 @@ class MesscutForm(forms.ModelForm):
     def clean_end_date(self):
         start_date = self.cleaned_data.get("start_date")
         end_date = self.cleaned_data["end_date"]
-        hostel_code = Application.objects.filter(applicant=self.request.user, accepted=True).first().hostel.code
+        hostel_code = (
+            Application.objects.filter(applicant=self.request.user, accepted=True)
+            .first()
+            .hostel.code
+        )
 
-        
-        if hostel_code == 'SNT':
+        if hostel_code == "SNT":
             snt_min_days = 4
-            gap = (end_date - start_date).days + 1    # difference in days
+            gap = (end_date - start_date).days + 1  # difference in days
             if gap < snt_min_days:
                 raise ValidationError(
                     f"You should have at least {snt_min_days} days gap between two mess cuts."
@@ -46,7 +49,7 @@ class MesscutForm(forms.ModelForm):
                 raise ValidationError(
                     "The end date must be at least 1 days after the start date."
                 )
-            if hostel_code == 'SNT' or hostel_code == 'SWR':
+            if hostel_code == "SNT" or hostel_code == "SWR":
                 if end_date > start_date + timedelta(days=10):
                     raise ValidationError(
                         "The end date cannot be more than 10 days after the start date."
@@ -62,7 +65,11 @@ class MesscutForm(forms.ModelForm):
         cleaned_data = super().clean()
         start_date = cleaned_data.get("start_date")
         end_date = cleaned_data.get("end_date")
-        hostel_code = Application.objects.filter(applicant=self.request.user, accepted=True).first().hostel.code
+        hostel_code = (
+            Application.objects.filter(applicant=self.request.user, accepted=True)
+            .first()
+            .hostel.code
+        )
 
         # Calculate the total days for the current mess cut
 
@@ -102,7 +109,7 @@ class MesscutForm(forms.ModelForm):
                                 )
                         # Ensure the total mess cut days do not exceed 10 days
 
-                        if hostel_code == 'SNT' or hostel_code == 'SWR':
+                        if hostel_code == "SNT" or hostel_code == "SWR":
                             if total_messcut_days + current_messcut_days > 10:
                                 raise ValidationError(
                                     "The total number of mess cut days for the month cannot exceed 10 days."

@@ -1,0 +1,70 @@
+{% extends 'custom_admin_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Total Attendance{% endblock %}
+{% block content %}
+<div class="bg-light py-3">
+    <div class="container mt-4">
+        {% if message %}
+        <h5 class="my-3 text-center alert alert-danger px-3 py-2 rounded">{{ message }}</h5>
+        {% endif %}
+        <div class="d-flex justify-content-center my-4">
+            <form action="{% url 'total_messcuts' %}" method="POST" class="row g-3 align-items-end">
+                {% csrf_token %}
+
+                <div class="col-md-4">
+                    <label for="date_of_attendance" class="form-label fw-medium">Month</label>
+                    <input type="month" name="date_of_attendance" id="date_of_attendance" class="form-control" required>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100">Submit</button>
+                </div>
+            </form>
+        </div>
+
+
+        <div class="d-flex justify-content-center my-4">
+            <table class="table table table-striped table-bordered mt-3  ">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-left">SL No</th>
+                        <th scope="col" class="text-left">Mess No</th>
+                        <th scope="col" class="text-left">Name</th>
+                        <th scope="col" class="text-left">MessCuts</th>
+                        <th scope="col" class="text-left">Total MessCut Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for app in applications %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ app.mess_no }}</td>
+                        <td>{{ app.first_name }} {{ app.last_name|default:"" }}</td>
+                        <td>
+                            {% if app.filtered_messcuts %}
+                                <ul class="mb-0">
+                                    {% for messcut in app.filtered_messcuts %}
+                                        <li>{{ messcut.start_date }} → {{ messcut.end_date }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                No MessCuts
+                            {% endif %}
+                        </td>
+                        <td>{{ app.total_messcut_days}}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No Applications Found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

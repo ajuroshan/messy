@@ -254,7 +254,9 @@ def mark_attendance(request):
             app_details = {
                 "full_name": f"{application.applicant.first_name + ' ' + application.applicant.last_name}",
                 "dept": str(application.department).upper(),
-                "image": application.profile_pic.url if application.profile_pic.url else None,
+                "image": application.profile_pic.url
+                if application.profile_pic.url
+                else None,
                 "mess_no": application.mess_no,
             }
             messcuts = application.messcuts.filter(
@@ -281,7 +283,7 @@ def mark_attendance(request):
                     hostel=application.hostel,
                     date=timezone.localdate(),
                 )
-                attendance.full_clean()   # Validate the attendance instance
+                attendance.full_clean()  # Validate the attendance instance
 
                 if confirm:
                     attendance.save()
@@ -318,7 +320,7 @@ def mark_attendance(request):
                         "message": f"Attendance already marked for {app_details['mess_no']}",
                         "app_details": app_details,
                         "meal_attendance": meal_attendance,
-                        "already_marked": True
+                        "already_marked": True,
                     },
                     status=400,
                 )

@@ -6,6 +6,8 @@ from datetime import datetime as dt
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import loader
 from django.utils.html import strip_tags
+from django.db.models import Prefetch
+
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -368,9 +370,7 @@ def calculate_mess_bill(hostel):
         mess_bills.delete()
 
     # Iterate through accepted applications
-    for application in Application.objects.filter(
-        accepted=True, hostel=hostel
-    ):
+    for application in Application.objects.filter(accepted=True, hostel=hostel):
         # Calculate total messcut days for the given month
         messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
 
@@ -491,7 +491,6 @@ def individual_attendance(request):
     return render(request, "admin/individual_attendance.html")
 
 
-
 @staff_member_required
 def individual_messcut(request):
     context = {}
@@ -511,9 +510,10 @@ def individual_messcut(request):
             month_of_attendance = int(date_of_attendance.split("-")[1])
 
             # Get the hostel of the logged-in user's accepted application
-            application = Application.objects.filter(mess_no__exact=mess_no, hostel=hostel).first()
+            application = Application.objects.filter(
+                mess_no__exact=mess_no, hostel=hostel
+            ).first()
             if application and application.hostel:
-
                 # Filter messcuts for that year+month
                 messcuts = application.messcuts.filter(
                     start_date__year=year_of_attendance,
@@ -524,11 +524,59 @@ def individual_messcut(request):
                 total_messcut_days = calculate_total_messcut_days(messcuts, hostel)
 
                 # Add everything to context
-                context.update({
-                    "mess_no": mess_no,
-                    "messcuts": messcuts,
-                    "total_messcut_days": total_messcut_days,
-                    "name_of_student": f"{application.applicant.first_name} {application.applicant.last_name}",
-                })
+                context.update(
+                    {
+                        "mess_no": mess_no,
+                        "messcuts": messcuts,
+                        "total_messcut_days": total_messcut_days,
+                        "name_of_student": f"{application.applicant.first_name} {application.applicant.last_name}",
+                    }
+                )
 
     return render(request, "admin/individual_messcut.html", context)
+
+
+@staff_member_required
+def total_messcuts(request):
+    context = {}
+
+    if request.method == "POST":
+        date_of_attendance = request.POST.get("date_of_attendance")
+        hostel = (
+            Application.objects.filter(applicant=request.user, accepted=True)
+            .first()
+            .hostel
+        )
+
+        if date_of_attendance:
+            year_of_attendance = int(date_of_attendance.split("-")[0])
+            month_of_attendance = int(date_of_attendance.split("-")[1])
+
+            applications = (
+                Application.objects.filter(hostel=hostel, accepted=True)
+                .order_by("mess_no_number")
+                .prefetch_related(
+                    Prefetch(
+                        "messcuts",
+                        queryset=Messcut.objects.filter(
+                            start_date__year=year_of_attendance,
+                            start_date__month=month_of_attendance,
+                        ),
+                        to_attr="filtered_messcuts",
+                    )
+                )
+            )
+
+            # ✅ add total_messcut_days to each application
+            for app in applications:
+                app.total_messcut_days = calculate_total_messcut_days(
+                    app.filtered_messcuts, app.hostel
+                )
+
+            context.update(
+                {
+                    "applications": applications,
+                }
+            )
+
+    return render(request, "admin/total_messcuts.html", context)
