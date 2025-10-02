@@ -516,7 +516,7 @@ def calculate_total_messcut_days(messcuts, hostel,closed_dates = None):
                 total_messcut_days += days
     else:
         for item in valid_messcuts:
-            total_messcut_days = len(valid_messcuts[item])
+            total_messcut_days += len(valid_messcuts[item])
 
     return total_messcut_days
 
