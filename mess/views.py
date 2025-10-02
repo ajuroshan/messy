@@ -26,7 +26,7 @@ from datetime import datetime
 from .forms import MesssettingsForm
 from .tasks import send_html_email
 from application.models import Application
-
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -485,19 +485,60 @@ def my_view(request):
     return HttpResponse(f"Task ID: {result.task_id} and the result is {result.get()}")
 
 
-def calculate_total_messcut_days(messcuts, hostel):
-    total_days = 0
-    if hostel.name == "Swaraj" or hostel.name == "Sahara":
-        for messcut in messcuts:
-            days = (messcut.end_date - messcut.start_date).days + 1
-            if days == 2:
-                total_days += 1
-            elif days == 3:
-                total_days += 2
-            else:
-                total_days += days
-        return total_days
+def calculate_total_messcut_days(messcuts, hostel,closed_dates = None):
+    messcuts_copy = deepcopy(messcuts)
+    valid_messcuts = {}
+    total_messcut_days = 0
+
+    # Remove all the invalid dates
+    if closed_dates is not None:
+        for messut_copy_item in messcuts_copy:
+            # Replace the messcut's get_date_range with a filtered version
+            original_dates = messut_copy_item.get_date_range()
+            valid_messcuts[messut_copy_item] = [d for d in original_dates if d not in closed_dates]
     else:
-        return sum(
-            (messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts
-        )
+        for messut_copy_item in messcuts_copy:
+            valid_messcuts[messut_copy_item] = messut_copy_item.get_date_range()
+
+    print(valid_messcuts)
+
+    # Custom rule for hostels
+    if hostel.name == "Swaraj" or hostel.name == "Sahara":
+        for item in valid_messcuts:
+            days = len(valid_messcuts[item])
+            if days == 1 or days == 0:
+                total_messcut_days += 0
+            elif days == 2:
+                total_messcut_days += 1
+            elif days == 3:
+                total_messcut_days += 2
+            else:
+                total_messcut_days += days
+    else:
+        for item in valid_messcuts:
+            total_messcut_days = len(valid_messcuts[item])
+
+    return total_messcut_days
+
+
+
+
+
+
+#
+# def calculate_total_messcut_days(messcuts, hostel):
+#     total_days = 0
+#     if hostel.name == "Swaraj" or hostel.name == "Sahara":
+#         for messcut in messcuts:
+#             days = (messcut.end_date - messcut.start_date).days + 1
+#             if days == 2:
+#                 total_days += 1
+#             elif days == 3:
+#                 total_days += 2
+#             else:
+#                 total_days += days
+#         return total_days
+#     else:
+#         return sum(
+#             (messcut.end_date - messcut.start_date).days + 1 for messcut in messcuts
+#         )

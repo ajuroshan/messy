@@ -375,12 +375,7 @@ def calculate_mess_bill(hostel):
         messcuts = application.messcuts.filter(start_date__month=BILL_DATE.month)
 
         total_messcut_days = calculate_total_messcut_days(messcuts, hostel)
-        effective_messcut_days = total_messcut_days
-
-        for date in MESS_CLOSED_DATES:
-            for messcut in messcuts:
-                if date in messcut.get_date_range():
-                    effective_messcut_days -= 1
+        effective_messcut_days = calculate_total_messcut_days(messcuts, hostel,MESS_CLOSED_DATES)
 
         effective_messcut_days = max(effective_messcut_days, 0)
 
