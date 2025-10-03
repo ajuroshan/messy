@@ -489,7 +489,6 @@ def calculate_total_messcut_days(messcuts, hostel,closed_dates = None,total_days
     messcuts_copy = deepcopy(messcuts)
     valid_messcuts = {}
     total_messcut_days = 0
-    max_messcut_days_for_swaraj = int(total_days/3)
 
     # Remove all the invalid dates
     if closed_dates is not None:
@@ -516,7 +515,7 @@ def calculate_total_messcut_days(messcuts, hostel,closed_dates = None,total_days
             else:
                 total_messcut_days += days
         if hostel.name == "Swaraj":
-            total_messcut_days = min(total_messcut_days, max_messcut_days_for_swaraj)
+            total_messcut_days = min(total_messcut_days, int(total_days/3) if total_days else total_messcut_days)
     else:
         for item in valid_messcuts:
             total_messcut_days += len(valid_messcuts[item])
