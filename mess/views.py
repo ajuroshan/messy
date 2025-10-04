@@ -370,11 +370,12 @@ def view_mess_bill(request):
         Application.objects.filter(applicant=request.user, accepted=True).first().hostel
     )
     details = Messsettings.objects.filter(hostel=hostel).first()
+    past_mess_bills = application.mess_bill.all()
 
     return render(
         request,
         "mess/view_mess_bill.html",
-        {"mess_bill": mess_bill, "application": application, "details": details},
+        {"mess_bill": mess_bill, "application": application, "details": details,"past_mess_bills": past_mess_bills},
     )
 
 
