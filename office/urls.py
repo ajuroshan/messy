@@ -29,4 +29,7 @@ urlpatterns = [
     path("individual_attendance/", individual_attendance, name="individual_attendance"),
     path("individual_messcut/", individual_messcut, name="individual_messcut"),
     path("total_messcuts/", total_messcuts, name="total_messcuts"),
+    path("toggle_paid/", toggle_paid, name="toggle_paid"),
+
+
 ]

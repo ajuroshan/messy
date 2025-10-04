@@ -29,7 +29,10 @@ from django.template import loader
 from django.conf import settings
 
 from mess.views import calculate_total_messcut_days
-
+from django.http import JsonResponse
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 # Create your views here.
 
@@ -575,3 +578,26 @@ def total_messcuts(request):
             )
 
     return render(request, "admin/total_messcuts.html", context)
+
+
+@staff_member_required
+def toggle_paid(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            bill_id = data.get("bill_id")
+            bill = MessBill.objects.get(id=bill_id)
+
+            bill.paid = data.get("paid", False)
+            bill.date_paid = now() if bill.paid else None
+            bill.save()
+
+            return JsonResponse({
+                "success": True,
+                "paid": bill.paid,
+                "date_paid": bill.date_paid.strftime("%B %d, %Y") if bill.date_paid else None
+            })
+        except MessBill.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Bill not found"}, status=404)
+
+    return JsonResponse({"success": False}, status=400)

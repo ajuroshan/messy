@@ -71,13 +71,22 @@
                         <td><strong>{{ bill.amount }}/-</strong></td>
 
                         <td>
-                            {% if bill.paid %}
-                                <span class="badge bg-success">Yes</span>
+                            <button
+                                class="btn btn-sm toggle-paid-btn text-nowrap
+                                       {% if bill.paid %}btn-success{% else %}btn-danger{% endif %}"
+                                data-bill-id="{{ bill.id }}"
+                                data-paid="{{ bill.paid|yesno:"true,false" }}">
+                                {% if bill.paid %}Paid{% else %}Not Paid{% endif %}
+                            </button>
+
+                        </td>
+                        <td id="date-paid-{{ bill.id }}">
+                            {% if bill.date_paid %}
+                                {{ bill.date_paid|date:"F j, Y" }}
                             {% else %}
-                                <span class="badge bg-danger">No</span>
+                                Not Paid
                             {% endif %}
                         </td>
-                        <td>{{ bill.date_paid|default:"Not Paid"|date:"F j, Y" }}</td>
                     </tr>
                 {% empty %}
                     <tr>
@@ -90,5 +99,68 @@
     </div>
 
 
+
+{% endblock %}
+
+
+
+{% block scripts %}
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-paid-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            let billId = this.dataset.billId;
+            let currentPaid = this.dataset.paid === "true";
+
+            // Prepare API call
+            fetch(`/office/toggle_paid/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({ bill_id: billId, paid: !currentPaid })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Toggle button UI
+                    this.dataset.paid = data.paid ? "true" : "false";
+                    this.textContent = data.paid ? "Paid" : "Not Paid";
+
+                    this.classList.toggle("btn-success", data.paid);
+                    this.classList.toggle("btn-danger", !data.paid);
+
+                    // Update Date Paid column
+                    const dateCell = document.getElementById(`date-paid-${billId}`);
+                    dateCell.textContent = data.date_paid || "Not Paid";
+                } else {
+                    alert("Failed to update payment status.");
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Error updating status.");
+            });
+        });
+    });
+});
+
+// CSRF helper (Django requirement)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 
 {% endblock %}
