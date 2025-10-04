@@ -72,12 +72,13 @@
 
                         <td>
                             <button
-                                class="btn btn-sm toggle-paid-btn text-nowrap
-                                       {% if bill.paid %}btn-success{% else %}btn-danger{% endif %}"
-                                data-bill-id="{{ bill.id }}"
-                                data-paid="{{ bill.paid|yesno:"true,false" }}">
-                                {% if bill.paid %}Paid{% else %}Not Paid{% endif %}
-                            </button>
+                            class="btn toggle-paid-btn text-nowrap
+                                   {% if bill.paid %}btn-success{% else %}btn-danger{% endif %}"
+                            style="padding: 4px 8px; font-size: 0.8rem; line-height: 1; border-radius: 3px;"
+                            data-bill-id="{{ bill.id }}"
+                            data-paid="{{ bill.paid|yesno:"true,false" }}">
+                            {% if bill.paid %}Paid{% else %}Not Paid{% endif %}
+                        </button>
 
                         </td>
                         <td id="date-paid-{{ bill.id }}">
