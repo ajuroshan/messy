@@ -393,13 +393,15 @@ def calculate_mess_bill(hostel):
         effective_messcut_days = max(effective_messcut_days, 0)
 
         effective_days = TOTAL_DAYS - effective_messcut_days
-        total_amount = (AMOUNT_PER_DAY * effective_days) + (
-            ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES
-        )
+
         if hostel.code == "SNT" and application.department.name in lakeside_departements :
             AMOUNT_PER_DAY = 85
         else:
             AMOUNT_PER_DAY = messsettings.amount_per_day
+
+        total_amount = (AMOUNT_PER_DAY * effective_days) + (
+            ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES
+        )
 
 
         # Create the mess bill
