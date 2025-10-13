@@ -6,7 +6,6 @@ from django.template import loader
 from django.utils.html import strip_tags
 from django.core.exceptions import ValidationError
 
-
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import *
@@ -29,7 +28,6 @@ from application.models import Application
 from copy import deepcopy
 
 logger = logging.getLogger(__name__)
-
 
 # Create your views here.
 @login_required

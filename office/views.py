@@ -368,6 +368,16 @@ def calculate_mess_bill(hostel):
     FEAST_CHARGES = messsettings.feast_charges
     MESS_CLOSED_DATES = [date.date for date in messsettings.mess_closed_dates.all()]
 
+    lakeside_departements = ["SCHOOL Of INDUSTRIAL FISHERIES",
+                             "DEPT OF ATMOSPHERIC SCIENCES",
+                             "DEPT OF CHEMICAL OCEANOGRAPHY",
+                             "MARINE GEOLOGY AND GEOPHYSICS",
+                             "DEPT OF PHYSICAL OCEANOGRAPHY",
+                             "MARINE BIOLOGY",
+                             "MICROBIOLOGY",
+                             "BIOCHEMISTRY"
+                             ]
+
     mess_bills = MessBill.objects.filter(month__month=BILL_DATE.month, hostel=hostel)
     if mess_bills.exists():
         mess_bills.delete()
@@ -386,6 +396,8 @@ def calculate_mess_bill(hostel):
         total_amount = (AMOUNT_PER_DAY * effective_days) + (
             ESTABLISHMENT_CHARGES + OTHER_CHARGES + FEAST_CHARGES
         )
+        if hostel.code == "SNT" and application.department.name in lakeside_departements :
+            AMOUNT_PER_DAY = 85
 
         # Create the mess bill
         mess_bill = application.mess_bill.get_or_create(
