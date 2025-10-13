@@ -398,6 +398,9 @@ def calculate_mess_bill(hostel):
         )
         if hostel.code == "SNT" and application.department.name in lakeside_departements :
             AMOUNT_PER_DAY = 85
+        else:
+            AMOUNT_PER_DAY = messsettings.amount_per_day
+
 
         # Create the mess bill
         mess_bill = application.mess_bill.get_or_create(
