@@ -7,6 +7,35 @@ from django.utils.safestring import mark_safe
 from .models import *
 
 
+
+
+lakeside_departements = ["SCHOOL Of INDUSTRIAL FISHERIES",
+                         "DEPT OF ATMOSPHERIC SCIENCES",
+                         "DEPT OF CHEMICAL OCEANOGRAPHY",
+                         "MARINE GEOLOGY AND GEOPHYSICS",
+                         "DEPT OF PHYSICAL OCEANOGRAPHY",
+                         "MARINE BIOLOGY",
+                         "MICROBIOLOGY",
+                         "BIOCHEMISTRY"
+                         ]
+
+class LakesideFilter(admin.SimpleListFilter):
+    title = "Lakeside"
+    parameter_name = "lakeside"
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', "Lakeside Departments"),
+            ('no', "Non-Lakeside Departments"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(department__name__in=lakeside_departements)
+        if self.value() == "no":
+            return queryset.exclude(department__name__in=lakeside_departements)
+        return queryset
+
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = [
@@ -34,6 +63,7 @@ class ApplicationAdmin(admin.ModelAdmin):
         "official_outmess",
         "department",
         "semester",
+        LakesideFilter,
     ]
     search_fields = [
         "applicant__first_name",
