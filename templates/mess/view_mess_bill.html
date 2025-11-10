@@ -95,15 +95,22 @@
                                         <h6 class="text-center mt-4">Scan the QR Code to Pay</h6>
 
                                         {% if not application.official_outmess %}
-                                            <div class="d-flex justify-content-center px-5 py-3">
+                                            <div class="d-flex flex-column justify-content-center px-5 py-3">
                                                 <img class="img-fluid" src="{{ details.mess_secretary_upi_qr.url }}"
                                                      alt="QR Code">
+                                                <a href="upi://pay?pa={{ details.mess_secretary_upi_id}}" class="badge bg-success mt-3 text-decoration-none">
+                                                    UPI ID: {{ details.mess_secretary_upi_id }}
+                                                </a>
+
                                             </div>
                                         {% else %}
                                             <div class="d-flex justify-content-center px-5 py-3">
                                                 <img class="img-fluid" src="{{ details.sagar_post_metric_upi_qr.url }}"
                                                      alt="QR Code">
                                             </div>
+                                                <a href="upi://pay?pa={{ details.sagar_post_metric_upi_id }}" class="badge bg-success mt-3 text-decoration-none">
+                                                    UPI ID: {{ details.sagar_post_metric_upi_id }}
+                                                </a>
                                         {% endif %}
                                     </div>
                                 </div>
