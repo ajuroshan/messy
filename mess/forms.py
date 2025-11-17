@@ -37,7 +37,7 @@ class MesscutForm(forms.ModelForm):
         )
 
         if hostel_code == "SNT":
-            snt_min_days = 4
+            snt_min_days = 3
             gap = (end_date - start_date).days + 1  # difference in days
             if gap < snt_min_days:
                 raise ValidationError(
