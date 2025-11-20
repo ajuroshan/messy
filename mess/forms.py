@@ -6,8 +6,6 @@ from .models import Messcut, MessBill, Feedback, MessClosedDate
 from application.models import Application
 from .models import Messsettings
 from django import forms
-from .views import calculate_total_messcut_days
-
 
 class MesscutForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -96,6 +94,7 @@ class MesscutForm(forms.ModelForm):
                         start_date__year=start_date.year,
                     )
                     if existing_messcuts:
+                        from .views import calculate_total_messcut_days
                         # total_messcut_days = sum(
                         #     (messcut.end_date - messcut.start_date).days + 1
                         #     for messcut in existing_messcuts
