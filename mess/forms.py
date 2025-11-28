@@ -1,11 +1,14 @@
 import datetime
 import json
-from django.core.exceptions import ValidationError
 from datetime import date, timedelta
-from .models import Messcut, MessBill, Feedback, MessClosedDate
-from application.models import Application
-from .models import Messsettings
+
 from django import forms
+from django.core.exceptions import ValidationError
+
+from application.models import Application
+
+from .models import Feedback, MessBill, MessClosedDate, Messcut, Messsettings
+
 
 class MesscutForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -95,11 +98,14 @@ class MesscutForm(forms.ModelForm):
                     )
                     if existing_messcuts:
                         from .views import calculate_total_messcut_days
+
                         # total_messcut_days = sum(
                         #     (messcut.end_date - messcut.start_date).days + 1
                         #     for messcut in existing_messcuts
                         # )
-                        total_messcut_days = calculate_total_messcut_days(existing_messcuts,applicant.hostel)
+                        total_messcut_days = calculate_total_messcut_days(
+                            existing_messcuts, applicant.hostel
+                        )
                         for messcut in existing_messcuts:
                             if (
                                 start_date <= messcut.end_date
@@ -116,6 +122,12 @@ class MesscutForm(forms.ModelForm):
                                     "The total number of mess cut days for the month cannot exceed 10 days."
                                 )
                         else:
+                            if hostel_code == "SGR":
+                                if total_messcut_days + current_messcut_days > 4:
+                                    raise ValidationError(
+                                        "The total number of mess cut days for the month cannot exceed 4 days."
+                                    )
+
                             if total_messcut_days + current_messcut_days > 8:
                                 raise ValidationError(
                                     "The total number of mess cut days for the month cannot exceed 8 days."
