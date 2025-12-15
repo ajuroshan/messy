@@ -80,6 +80,8 @@ class ApplicationAdmin(admin.ModelAdmin):
         "make_mess_assistant",
         "dismiss_mess_assistant",
     ]
+    autocomplete_fields = ("messcuts",)
+    exclude = ("attendance",)
 
     def profile(self, obj):
         return mark_safe(
@@ -239,6 +241,9 @@ class AcceptedApplicationAdmin(admin.ModelAdmin):
         "make_outmess",
         "cancel_outmess",
     ]
+    autocomplete_fields = ("messcuts",)
+    exclude = ("attendance",)
+
 
     def profile(self, obj):
         return mark_safe(
