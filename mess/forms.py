@@ -123,9 +123,9 @@ class MesscutForm(forms.ModelForm):
                                 )
                         else:
                             if hostel_code == "SGR":
-                                if total_messcut_days + current_messcut_days > 4:
+                                if total_messcut_days + current_messcut_days > 8:
                                     raise ValidationError(
-                                        "The total number of mess cut days for the month cannot exceed 4 days."
+                                        "The total number of mess cut days for the month cannot exceed 8 days."
                                     )
 
                             if total_messcut_days + current_messcut_days > 8:
