@@ -335,13 +335,13 @@ def attendance_cut_details_admin(request):
 
     # Calculate who didn't attend each meal
     breakfast_not_attended_details = valid_applications.exclude(
-        applicant__in=breakfast_attended_students
+        id__in=breakfast_attended_students
     )
     lunch_not_attended_details = valid_applications.exclude(
-        applicant__in=lunch_attended_students
+        id__in=lunch_attended_students
     )
     dinner_not_attended_details = valid_applications.exclude(
-        applicant__in=dinner_attended_students
+        id__in=dinner_attended_students
     )
 
     # Render the results to a template
